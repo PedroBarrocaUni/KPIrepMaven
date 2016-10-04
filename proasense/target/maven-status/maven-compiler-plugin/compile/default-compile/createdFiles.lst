@@ -1,0 +1,10 @@
+dataServer\database\dbobjects\KpiDataObject.class
+dataServer\LoggingSystem.class
+dataServer\database\dbobjects\HeatMap.class
+dataServer\database\dbobjects\HeatMap$1.class
+dataServer\database\DBConfig.class
+dataServer\database\dbobjects\ResultTableElement.class
+dataServer\database\enums\TableValueType.class
+dataServer\database\dbobjects\ResultTable$1.class
+dataServer\database\dbobjects\ResultTable.class
+dataServer\database\enums\SamplingInterval.class
