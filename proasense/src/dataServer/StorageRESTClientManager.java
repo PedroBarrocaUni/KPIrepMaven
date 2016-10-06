@@ -62,12 +62,8 @@ public class StorageRESTClientManager {
         //get storage IPs, URLs and Ports from environment variables
 		storageURL = System.getenv("StorageURL");
 		storageLocation = System.getenv("StorageLocation");
-		storagePortReadC = System.getenv("StoragePortReadC");
-		storagePortRegistryC = System.getenv("StoragePortRegistryC");
-	    System.out.println("\n\n###############################################################\n\n");
-	    System.out.println("\n valores: \n storageURL -> "+storageURL+"\n storageLocation -> "+storageLocation+"\n storagePortReadC -> "+storagePortReadC+"\n storagePortRegistryC -> "+storagePortRegistryC+"\n");
-	    System.out.println("\n\n###############################################################\n\n");
-	    
+		storagePortReadC = System.getenv("storagePortReadC");
+		storagePortRegistryC = System.getenv("storagePortRegistryC");
     }
 
     public List<RecommendationEvent> /*List<FeedbackEvent>*/ readFromStorage(String startDate, String endDate) {
