@@ -187,6 +187,13 @@ public class StorageRESTClientManager {
             query = new HttpPost(storageURL);
             query.setHeader("Content-type", "application/json");
             query.setHeader("Body", kpiInfo);
+            
+            System.out.println("\n\n\n########################################################################################################\n\n\n");
+            System.out.println(kpiInfo);
+            System.out.println("\n\n\n########################################################################################################\n\n\n");
+            System.out.println(query.toString());
+            System.out.println("\n\n\n########################################################################################################\n\n\n");
+            
             response = client.execute(query);
 
             // Check status code
@@ -218,7 +225,14 @@ public class StorageRESTClientManager {
 
         try {
         	HttpDelete query = new HttpDelete(storageURL.concat("/").concat(kpiID));
-            response = client.execute(query);
+        	
+        	
+        	System.out.println("\n\n\n########################################################################################################\n\n\n");
+        	System.out.println(query.toString());
+        	System.out.println("\n\n\n########################################################################################################\n\n\n");
+            
+        	
+        	response = client.execute(query);
 
             // Check status code
             status = response.getStatusLine().getStatusCode();

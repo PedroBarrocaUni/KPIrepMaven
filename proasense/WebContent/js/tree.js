@@ -147,6 +147,7 @@ window.onload = function() {
 	if (!restAddress.endsWith('/')) {
 		restAddress = restAddress + '/';
 	}
+	
 	$.ajax({
 		url: restAddress + 'proasense_hella/sensor',
 		type: 'GET',
@@ -155,6 +156,7 @@ window.onload = function() {
 			screen1.loadSensors();
 		}
 	});
+	
 	$.ajax({
 		url: restAddress + 'proasense_hella/kpi_agg_type',
 		type: 'GET',
@@ -169,6 +171,7 @@ window.onload = function() {
 			sampInt = data;
 		}
 	});
+	
 	$.ajax({
 		url: restAddress + 'proasense_hella/mould',
 		type: 'GET',
@@ -200,6 +203,7 @@ window.onload = function() {
 			machines = data;
 		}
 	});
+	/*
 	$.ajax({
 		url: restAddress + 'proasense_hella/kpi_formula',
 		type: 'GET',
@@ -207,6 +211,7 @@ window.onload = function() {
 			kpiFormulas = data;
 		}
 	});
+	*/
 	$.ajax({
 		url: restAddress + 'proasense_hella/sensorevent',
 		type: 'GET',
@@ -214,6 +219,7 @@ window.onload = function() {
 			sensorEvents = data;
 		}
 	});
+	/*
 	$.ajax({
 		url: restAddress + 'proasense_hella/kpi_target',
 		type: 'GET',
@@ -221,6 +227,8 @@ window.onload = function() {
 			kpiTargets = data;
 		}
 	});
+	
+	*/
 	$.ajax({
 		url: restAddress + 'proasense_hella/kpi',
 		type: 'GET',
@@ -251,7 +259,6 @@ window.onload = function() {
 
 		}
 	});
-	
 	
 //	window.alert("After requests --------------- ");
 	

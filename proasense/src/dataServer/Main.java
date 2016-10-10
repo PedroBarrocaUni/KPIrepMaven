@@ -36,12 +36,11 @@ import eu.proasense.internal.*;
 
 @WebServlet("/data/*")
 public class Main extends HttpServlet {
-	static LoggingSystem _log;
-	String logPath;
-	String dbPath;
-	DBConfig dbConfig;
-	DatabaseAccessObject dAO;
+	
 	StorageRESTClientManager SRCM;
+	private int kpiID;
+	private int formulaID;
+	private int sensorEventID;
 
 	public static Map<String, String> splitQuery(String query) throws UnsupportedEncodingException {
 		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
@@ -60,7 +59,7 @@ public class Main extends HttpServlet {
 			// ################################################ variavel para
 			// utilizar storage ou valores de teste
 			// ###################################
-			boolean testing = true;
+			boolean testing = false;
 			// #################################################################################################################################################
 
 			DriverManager.registerDriver(new org.hsqldb.jdbcDriver());
@@ -139,7 +138,30 @@ public class Main extends HttpServlet {
 																// result
 					break;
 
+				case "kpi":
+					
+					response.getWriter().println("[]");
+					
+					break;
+					
+				case "kpi_agg_type":
+					
+					response.getWriter().println("[{\"id\":\"1\",\"aggregation\":\"NONE\"},{\"id\":\"2\",\"aggregation\":\"MIN\"},{\"id\":\"3\",\"aggregation\":\"MAX\"},{\"id\":\"4\",\"aggregation\":\"AVG\"},{\"id\":\"5\",\"aggregation\":\"SUM\"},{\"id\":\"6\",\"aggregation\":\"COUNT\"}]");
+					
+					break;
+					
+				case "granularity":
+					
+					response.getWriter().println("[{\"id\":\"1\",\"name\":\"month\"},{\"id\":\"2\",\"name\":\"week\"},{\"id\":\"3\",\"name\":\"day\"},{\"id\":\"4\",\"name\":\"hour\"},{\"id\":\"5\",\"name\":\"minute\"},{\"id\":\"6\",\"name\":\"second\"}]");
+					
+					break;
+					
 				default:
+					
+					System.out.println("\n\nget data main default\n\n");
+					
+					//getting info from de DB
+					/*
 					Connection c = DriverManager.getConnection(dbConfig.jdbcURL + dbName, dbConfig.userName,
 							dbConfig.password);
 					Statement s = c.createStatement();
@@ -207,7 +229,8 @@ public class Main extends HttpServlet {
 					response.getWriter().println(str);
 					writeLogMsg(tableName + ":" + str);
 					writeLogMsg("Response at: " + remoteAddress);
-					c.close();
+					c.close();*/
+					
 				}
 			}
 
@@ -474,7 +497,7 @@ public class Main extends HttpServlet {
 		if (secondContextStr != null) {
 			secondContext = TableValueType.valueOf(getParamValueOf(requestData.get("secondContext").toUpperCase()));
 		}
-
+		/*
 		try {
 			writeLogMsg("Requesting <" + samplingInterval.toString().toLowerCase() + "> data from <"
 					+ startTime.toString() + "> to <" + endTime.toString() + "> for <KPI = " + kpiId + ">.");
@@ -511,7 +534,9 @@ public class Main extends HttpServlet {
 		} catch (Exception e) {
 			writeLogMsg(e.getMessage());
 			return "";
-		}
+		}*/
+		
+		return "";
 	}
 
 	public Object getRealTimeKpis(Map<String, String> requestData) {
@@ -529,7 +554,7 @@ public class Main extends HttpServlet {
 			return new JSONObject();
 		}
 	}
-
+	
 	private String getParamValueOf(String paramString) {
 		return paramString.substring(paramString.indexOf("=") + 1);
 	}
@@ -575,6 +600,7 @@ public class Main extends HttpServlet {
 			varY = TableValueType.valueOf(getParamValueOf(requestData.get("varY").toUpperCase()));
 		}
 
+		/*
 		try {
 			JSONObject obj = new JSONObject();
 			JSONParser parser = new JSONParser();
@@ -609,11 +635,15 @@ public class Main extends HttpServlet {
 			writeLogMsg(e.getMessage());
 			return "";
 		}
-
+		*/
+		return "";
 	}
 
+	//insert data in the DB
 	public void insertData(HttpServletResponse response, String dbName, String tableName, Object data,
 			String remoteAddress) {
+		
+		/*
 		try {
 			String str = "";
 			String query = "";
@@ -684,13 +714,46 @@ public class Main extends HttpServlet {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+		}*/
+		
+		try {
+			switch(tableName){
+				case "kpi":
+									
+					response.getWriter().println(
+							"{\"succeeded\":true,\"result\":\" 1 records added\",\"insertId\":[" + this.kpiID++ + "]}");
+					break;
+				
+				case "kpi_formula":
+	
+					response.getWriter().println(
+							"{\"succeeded\":true,\"result\":\" 1 records added\",\"insertId\":[" + this.formulaID++ + "]}");
+					break;
+					
+				case "sensorevent":
+	
+					response.getWriter().println(
+							"{\"succeeded\":true,\"result\":\" 1 records added\",\"insertId\":[" + this.sensorEventID++ + "]}");
+					break;
+				
+				default:
+					
+					System.out.println("\n\nTable name: "+ tableName);
+					break;
+			
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 
 	}
 
+	//update data in de DB
 	public void updateData(HttpServletResponse response, String dbName, String tableName, Object data,
 			String remoteAddress) {
-		try {
+		
+		/*try {
 			String str = "";
 			String query = "";
 			Integer upRows = null;
@@ -731,12 +794,14 @@ public class Main extends HttpServlet {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-		}
+		}*/
 	}
 
+	//delete data from de DB
 	public void deleteData(HttpServletResponse response, String dbName, String tableName, Object data,
 			String remoteAddress) {
-		try {
+		
+		/*try {
 			Integer delRows = null;
 			// String query = "DELETE FROM \""+tableName+"\" WHERE ";
 			String query = "DELETE FROM \"" + tableName.toUpperCase() + "\" WHERE ";
@@ -770,6 +835,29 @@ public class Main extends HttpServlet {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+		}*/
+		
+		try {
+			switch(tableName){
+				case "kpi":
+									
+					break;				
+				case "kpi_formula":
+	
+					break;					
+				case "sensorevent":
+	
+					break;				
+				default:
+					
+					System.out.println("\n\nTable name: "+ tableName);
+					break;
+			
+			}
+			response.getWriter().println("{\"succeeded\":\"true\",\"result\":\" 1 records deleted\"}");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 
 	}
@@ -795,6 +883,8 @@ public class Main extends HttpServlet {
 				JSONObject properties = new JSONObject();
 				JSONObject window = new JSONObject();
 				
+				System.out.println("\n\n\n\ntype -> "+obj.get("calculation_type").toString());
+				
 				switch(obj.get("calculation_type").toString()){
 					case "simple":
 											
@@ -811,7 +901,7 @@ public class Main extends HttpServlet {
 						properties.put("operationType",  obj.get("number_support"));
 						properties.put("window", window);
 						
-						operation.put("type", "UnaryOperation");
+						operation.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
 						operation.put("properties", properties);
 						
 						storageModelObject.put("kpiId", obj.get("id"));
@@ -836,7 +926,7 @@ public class Main extends HttpServlet {
 						properties.put("operationType",  obj.get("number_support"));
 						properties.put("window", window);
 						
-						operation.put("type", "UnaryOperation");
+						operation.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
 						operation.put("properties", properties);
 						
 						storageModelObject.put("kpiId", obj.get("id"));
@@ -847,7 +937,7 @@ public class Main extends HttpServlet {
 						
 						break;
 					case "composed":
-						
+												
 						JSONObject leftOp = new JSONObject();
 						JSONObject leftOpP = new JSONObject();
 						JSONObject rightOp = new JSONObject();
@@ -870,7 +960,7 @@ public class Main extends HttpServlet {
 							leftOpP.put("partition", obj.get("eventpartition1"));
 							leftOpP.put("window", window);
 							
-							leftOp.put("type", "UnaryOperation");
+							leftOp.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
 							leftOp.put("properties", leftOpP);
 							
 							rightOpP.put("unaryOperationType", obj.get("aggregationName"));
@@ -881,7 +971,7 @@ public class Main extends HttpServlet {
 							rightOpP.put("partition", obj.get("eventpartition2"));
 							rightOpP.put("window", window);
 							
-							rightOp.put("type", "UnaryOperation");
+							rightOp.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
 							rightOp.put("properties", rightOpP);
 							
 							properties.put("left", leftOp);
@@ -889,7 +979,7 @@ public class Main extends HttpServlet {
 							properties.put("arithmeticOperationType", obj.get("operator1"));
 							properties.put("operationType", obj.get("number_support"));
 							
-							operation.put("type", "BinaryOperation");
+							operation.put("type", "de.fzi.cep.sepa.kpi.BinaryOperation");
 							operation.put("properties", properties);
 							
 							storageModelObject.put("kpiId", obj.get("id"));
@@ -901,6 +991,8 @@ public class Main extends HttpServlet {
 						
 						break;
 					default:
+						
+						
 						break;
 				}
 				
@@ -940,6 +1032,7 @@ public class Main extends HttpServlet {
 	
 	public void handle(String target, HttpServletRequest baseRequest, HttpServletResponse response)
 			throws IOException, ServletException {
+		
 		String method = baseRequest.getMethod();
 		String remoteAddress = baseRequest.getHeader("X-Forwarded-for") == null ? baseRequest.getRemoteAddr()
 				: baseRequest.getHeader("X-Forwarded-for");
@@ -949,6 +1042,7 @@ public class Main extends HttpServlet {
 		// String requestParamTP = baseRequest.getParameter("tp");
 		// String requestParams6 = baseRequest.getServletPath();
 		writeLogMsg(method + " Request from: " + remoteAddress + " Request target: " + target);
+		System.out.println("\n\n"+method + " Request from: " + remoteAddress + " Request target: " + target);
 		writeReceivedHeadersToLog(baseRequest);
 
 		String[] parts = target.split("/");
@@ -1041,12 +1135,8 @@ public class Main extends HttpServlet {
 	}
 
 	private static void writeLogMsg(String msg) {
-		System.out.println(msg);
-		_log.saveToFile(msg);
-	}
-
-	public void Test() {
-		this.insertData(null, "proasense_hella", "kpi", null, null);
+		//System.out.println(msg);
+		//_log.saveToFile(msg);
 	}
 
 	@Override
@@ -1070,7 +1160,7 @@ public class Main extends HttpServlet {
 	}
 
 	public void init() {
-		ServletContext context = getServletContext();
+		/*ServletContext context = getServletContext();
 		logPath = context.getRealPath("WEB-INF") + "/";
 		// Database that needs to be used IMPORTANT:has its identifiers as
 		// uppercase
@@ -1080,8 +1170,11 @@ public class Main extends HttpServlet {
 		_log = LoggingSystem.getLog(logPath);
 		System.out.println("Database path: " + dbPath);
 		System.out.println("LogSystem configured in: " + logPath);
-
+		 */
 		this.SRCM = new StorageRESTClientManager();
 		
+		kpiID=1;
+		formulaID=1;
+		sensorEventID=1;		
 	}
 }

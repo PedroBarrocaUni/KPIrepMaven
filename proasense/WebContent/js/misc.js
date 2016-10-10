@@ -60,6 +60,7 @@ Math.seed = 0;
  * 
  */
 Math.seededRandom = function(max, min) {
+	
 	max = max || 1;
 	min = min || 0;
 
@@ -70,6 +71,7 @@ Math.seededRandom = function(max, min) {
 }
 
 function closePane() {
+	
 	toClosePane = true;
 	var imgUrl = $('#arrow').attr("src");
 	$('#wrapper').css('paddingLeft', 0);
@@ -80,9 +82,11 @@ function closePane() {
 		scrGraph.adjustGraph();
 		scrGraph.adjustHeatMap();
 	}, 1000);
+
 }
 
 function openPane() {
+
 	toClosePane = false;
 	var imgUrl = $('#arrow').attr("src");
 	$('#wrapper').css('paddingLeft', 290);

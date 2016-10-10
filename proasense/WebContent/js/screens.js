@@ -352,7 +352,7 @@ function Screen1(elInfo) {
 		
 	}
 
-	this.changePartitionIDs = function() {
+	this.changePartitionIDs = function(asynchronous) {
 
 		var partitionType = $('input[name=partition]:checked', '#contextualInformation').val()
 		if(partitionType == "none"){
@@ -365,6 +365,7 @@ function Screen1(elInfo) {
 			$.ajax({
 				url : restAddress + 'proasense_hella/partitionType/'
 						+ partitionType,
+				async: asynchronous ,
 				type : 'GET',
 				success : function(events) {
 
@@ -564,9 +565,11 @@ function Screen1(elInfo) {
 					//get sensor configurations
 					var sEnv = {};
 					for(var idx = 0 ; idx < sensorEvents.length ; idx++)
-						if(sensorEvents[idx].id == kpiFormula.term1_sensor_id)
+						if(sensorEvents[idx].id == kpiFormula.term1_sensor_id){
 							sEnv = sensorEvents[idx];
-					
+							break;
+						}
+										
 					//this.updateField('selectSensor1',sEnv.sensorname);
 					$('#selectSensor1 option[value="'+ sEnv.sensorid +'"]').prop('selected',true);
 					//get sensor properties
@@ -580,14 +583,9 @@ function Screen1(elInfo) {
 					if(sEnv.eventpartition != null)
 						showpartition = true;
 					
-					
-
-					//newsensorKpi.eventname = $('#selectSensorEvent1').find(":selected").text();
-					//newsensorKpi.eventtype = $('#selectSensorEvent1').find(":selected").attr("type");
-					//newsensorKpi.eventpartition = $('#selectSensorEvent1').find(":selected").attr("partition");
-					
 					break;
 				case 'aggregate':
+				
 					
 					break;
 				case 'composed':
@@ -618,7 +616,7 @@ function Screen1(elInfo) {
 						return true;
 					}
 					     
-					this.changePartitionIDs();
+					this.changePartitionIDs(false);
 					$('#partitionOptions').val(sEnv.partitionid).prop('selected',true);
 				}
 
@@ -890,12 +888,11 @@ function Screen1(elInfo) {
 				
 				if(newKpi.calculation_type != "aggregate"){
 					newKpi.aggregation = 1;
-					newkpiInformation.aggregationName = "none";
+					newkpiInformation.aggregationName = "NONE";
 				}
 				else{
 					if($('#selectAggType').val()==null){
-						//newKpi.aggregation = 1;
-						//newkpiInformation.aggregationName = "none";
+						
 						$.notify('Please choose the aggregation type', 'info');
 						return;
 					}else{
@@ -922,6 +919,7 @@ function Screen1(elInfo) {
 							success : function(result) {
 								
 								if (result.succeeded) {
+									
 									//insert new kpi ID
 									newKpiFormula.kpi_id = result.insertId[0];
 									newKpi.id = result.insertId[0];
@@ -954,7 +952,8 @@ function Screen1(elInfo) {
 												if (result.succeeded) {
 													
 													newKpiFormula.term1_sensor_id = result.insertId[0];
-																										
+													newsensorKpi.id = result.insertId[0];
+													
 													$.ajax({
 																url : restAddress
 																		+ 'proasense_hella/kpi_formula',
@@ -1072,10 +1071,13 @@ function Screen1(elInfo) {
 												$('html').unblock();
 												if (result.succeeded) {
 													
-													if(sensor1)
+													if(sensor1){
 														newKpiFormula.term1_sensor_id = result.insertId[0];
-													else
+														newsensorKpi.id = result.insertId[0];
+													}else
 														newKpiFormula.term1_kpi_id = result.insertId[0];
+													
+													
 													
 													$.ajax({
 																url : restAddress
@@ -1095,7 +1097,7 @@ function Screen1(elInfo) {
 																		//inform the storage of the new kpi
 																		$.ajax({
 																			url : restAddress
-																					+ 'proasense_hella/information',
+																					+ 'proasense_hella/insert',
 																			type : 'POST',
 																			data : '{"type":"INFORM","data":['
 																					+ JSON
@@ -1213,6 +1215,7 @@ function Screen1(elInfo) {
 													
 													if(sensor1){
 														newKpiFormula.term1_sensor_id = result.insertId[0];
+														newsensorKpi.id = result.insertId[0];
 														//add to local	
 														sensorEvents.push(newsensorKpi);
 													}else
@@ -1263,6 +1266,7 @@ function Screen1(elInfo) {
 												if (result.succeeded) {
 													if(sensor2){
 														newKpiFormula.term2_sensor_id = result.insertId[0];
+														newsensorKpi.id = result.insertId[0];
 														//add to local	
 														sensorEvents.push(newsensorKpi);
 													}else
@@ -1317,6 +1321,7 @@ function Screen1(elInfo) {
 													if (result.succeeded) {
 														if(sensor3){
 															newKpiFormula.term3_sensor_id = result.insertId[0];
+															newsensorKpi.id = result.insertId[0];
 															//add to local	
 															sensorEvents.push(newsensorKpi);
 														}else
@@ -1351,7 +1356,7 @@ function Screen1(elInfo) {
 														//inform the storage of the new kpi
 														$.ajax({
 															url : restAddress
-																	+ 'proasense_hella/information',
+																	+ 'proasense_hella/insert',
 															type : 'POST',
 															data : '{"type":"INFORM","data":['
 																	+ JSON

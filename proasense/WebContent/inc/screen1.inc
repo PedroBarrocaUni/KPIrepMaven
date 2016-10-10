@@ -117,10 +117,10 @@
 			<td>
 				<select id="op1" class="box grey" style="width:60">
 					<option value="" disabled selected hidden>Op</option>
-					<option value="add">+</option>
-					<option value="subtract">-</option>
-					<option value="multiply">x</option>
-					<option value="divide">/</option>
+					<option value="SUM">+</option>
+					<option value="DIFF">-</option>
+					<option value="MULTIPLY">x</option>
+					<option value="DIVIDE">/</option>
 				</select>
 			</td>
 			<td>
@@ -133,11 +133,10 @@
 			<td>
 				<select id="op2" class="box grey" style="width:80">
 					<option value="" disabled selected hidden>Op</option>
-					<option value="none">none</option>
-					<option value="add">+</option>
-					<option value="subtract">-</option>
-					<option value="multiply">x</option>
-					<option value="divide">/</option>
+					<option value="SUM">+</option>
+					<option value="DIFF">-</option>
+					<option value="MULTIPLY">x</option>
+					<option value="DIVIDE">/</option>
 				</select>
 			</td>
 			<td>
