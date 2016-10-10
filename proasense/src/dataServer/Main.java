@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -36,6 +37,12 @@ import eu.proasense.internal.*;
 
 @WebServlet("/data/*")
 public class Main extends HttpServlet {
+	
+	static LoggingSystem _log;
+	String logPath;
+	String dbPath;
+	DBConfig dbConfig;
+	DatabaseAccessObject dAO;
 	
 	StorageRESTClientManager SRCM;
 	private int kpiID;
@@ -138,7 +145,7 @@ public class Main extends HttpServlet {
 																// result
 					break;
 
-				case "kpi":
+				/*case "kpi":
 					
 					response.getWriter().println("[]");
 					
@@ -155,13 +162,11 @@ public class Main extends HttpServlet {
 					response.getWriter().println("[{\"id\":\"1\",\"name\":\"month\"},{\"id\":\"2\",\"name\":\"week\"},{\"id\":\"3\",\"name\":\"day\"},{\"id\":\"4\",\"name\":\"hour\"},{\"id\":\"5\",\"name\":\"minute\"},{\"id\":\"6\",\"name\":\"second\"}]");
 					
 					break;
-					
+					*/
 				default:
 					
-					System.out.println("\n\nget data main default\n\n");
-					
 					//getting info from de DB
-					/*
+					
 					Connection c = DriverManager.getConnection(dbConfig.jdbcURL + dbName, dbConfig.userName,
 							dbConfig.password);
 					Statement s = c.createStatement();
@@ -229,7 +234,7 @@ public class Main extends HttpServlet {
 					response.getWriter().println(str);
 					writeLogMsg(tableName + ":" + str);
 					writeLogMsg("Response at: " + remoteAddress);
-					c.close();*/
+					c.close();
 					
 				}
 			}
@@ -497,7 +502,7 @@ public class Main extends HttpServlet {
 		if (secondContextStr != null) {
 			secondContext = TableValueType.valueOf(getParamValueOf(requestData.get("secondContext").toUpperCase()));
 		}
-		/*
+		
 		try {
 			writeLogMsg("Requesting <" + samplingInterval.toString().toLowerCase() + "> data from <"
 					+ startTime.toString() + "> to <" + endTime.toString() + "> for <KPI = " + kpiId + ">.");
@@ -534,9 +539,7 @@ public class Main extends HttpServlet {
 		} catch (Exception e) {
 			writeLogMsg(e.getMessage());
 			return "";
-		}*/
-		
-		return "";
+		}
 	}
 
 	public Object getRealTimeKpis(Map<String, String> requestData) {
@@ -600,7 +603,7 @@ public class Main extends HttpServlet {
 			varY = TableValueType.valueOf(getParamValueOf(requestData.get("varY").toUpperCase()));
 		}
 
-		/*
+		
 		try {
 			JSONObject obj = new JSONObject();
 			JSONParser parser = new JSONParser();
@@ -635,15 +638,14 @@ public class Main extends HttpServlet {
 			writeLogMsg(e.getMessage());
 			return "";
 		}
-		*/
-		return "";
+		
 	}
 
 	//insert data in the DB
 	public void insertData(HttpServletResponse response, String dbName, String tableName, Object data,
 			String remoteAddress) {
 		
-		/*
+		
 		try {
 			String str = "";
 			String query = "";
@@ -714,8 +716,8 @@ public class Main extends HttpServlet {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-		}*/
-		
+		}
+		/*
 		try {
 			switch(tableName){
 				case "kpi":
@@ -745,7 +747,7 @@ public class Main extends HttpServlet {
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
+		}*/
 
 	}
 
@@ -801,7 +803,7 @@ public class Main extends HttpServlet {
 	public void deleteData(HttpServletResponse response, String dbName, String tableName, Object data,
 			String remoteAddress) {
 		
-		/*try {
+		try {
 			Integer delRows = null;
 			// String query = "DELETE FROM \""+tableName+"\" WHERE ";
 			String query = "DELETE FROM \"" + tableName.toUpperCase() + "\" WHERE ";
@@ -835,8 +837,8 @@ public class Main extends HttpServlet {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-		}*/
-		
+		}
+		/*
 		try {
 			switch(tableName){
 				case "kpi":
@@ -858,7 +860,7 @@ public class Main extends HttpServlet {
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
+		}*/
 
 	}
 
@@ -1135,8 +1137,8 @@ public class Main extends HttpServlet {
 	}
 
 	private static void writeLogMsg(String msg) {
-		//System.out.println(msg);
-		//_log.saveToFile(msg);
+		System.out.println(msg);
+		_log.saveToFile(msg);
 	}
 
 	@Override
@@ -1160,17 +1162,33 @@ public class Main extends HttpServlet {
 	}
 
 	public void init() {
-		/*ServletContext context = getServletContext();
-		logPath = context.getRealPath("WEB-INF") + "/";
+		ServletContext context = getServletContext();
+		logPath = System.getProperty("user.home")
+				+File.separator+"proasense"
+				+File.separator+"proasenseModeller"
+				+File.separator+"KPIrepMaven"
+				+File.separator;
 		// Database that needs to be used IMPORTANT:has its identifiers as
 		// uppercase
-		dbPath = context.getRealPath("WEB-INF/db/");
+		dbPath = System.getProperty("user.home")
+				+File.separator+"proasense"
+				+File.separator+"proasenseModeller"
+				+File.separator+"KPIrepMaven"
+				+File.separator+"db"
+				+File.separator;
+		
+		System.out.println("\n\n\n######################################################################################\n");
+		System.out.println("Caminho -> " + logPath);
+		System.out.println("Caminho -> " + dbPath);
+		System.out.println("\n######################################################################################\n\n\n");
+		
 		dbConfig = new DBConfig("jdbc:hsqldb:file:" + dbPath, "", "SA", "");
 		dAO = new DatabaseAccessObject(dbPath, logPath);
 		_log = LoggingSystem.getLog(logPath);
+		
 		System.out.println("Database path: " + dbPath);
 		System.out.println("LogSystem configured in: " + logPath);
-		 */
+		 
 		this.SRCM = new StorageRESTClientManager();
 		
 		kpiID=1;
