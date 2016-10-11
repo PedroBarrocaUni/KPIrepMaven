@@ -203,7 +203,6 @@ window.onload = function() {
 			machines = data;
 		}
 	});
-	/*
 	$.ajax({
 		url: restAddress + 'proasense_hella/kpi_formula',
 		type: 'GET',
@@ -211,7 +210,6 @@ window.onload = function() {
 			kpiFormulas = data;
 		}
 	});
-	*/
 	$.ajax({
 		url: restAddress + 'proasense_hella/sensorevent',
 		type: 'GET',
@@ -219,7 +217,6 @@ window.onload = function() {
 			sensorEvents = data;
 		}
 	});
-	/*
 	$.ajax({
 		url: restAddress + 'proasense_hella/kpi_target',
 		type: 'GET',
@@ -227,8 +224,6 @@ window.onload = function() {
 			kpiTargets = data;
 		}
 	});
-	
-	*/
 	$.ajax({
 		url: restAddress + 'proasense_hella/kpi',
 		type: 'GET',

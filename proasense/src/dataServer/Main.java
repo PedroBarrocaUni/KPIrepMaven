@@ -29,6 +29,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import org.apache.commons.lang.SystemUtils;
+
 import dataServer.database.DBConfig;
 import dataServer.database.enums.SamplingInterval;
 import dataServer.database.enums.TableValueType;
@@ -45,9 +47,6 @@ public class Main extends HttpServlet {
 	DatabaseAccessObject dAO;
 	
 	StorageRESTClientManager SRCM;
-	private int kpiID;
-	private int formulaID;
-	private int sensorEventID;
 
 	public static Map<String, String> splitQuery(String query) throws UnsupportedEncodingException {
 		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
@@ -145,24 +144,6 @@ public class Main extends HttpServlet {
 																// result
 					break;
 
-				/*case "kpi":
-					
-					response.getWriter().println("[]");
-					
-					break;
-					
-				case "kpi_agg_type":
-					
-					response.getWriter().println("[{\"id\":\"1\",\"aggregation\":\"NONE\"},{\"id\":\"2\",\"aggregation\":\"MIN\"},{\"id\":\"3\",\"aggregation\":\"MAX\"},{\"id\":\"4\",\"aggregation\":\"AVG\"},{\"id\":\"5\",\"aggregation\":\"SUM\"},{\"id\":\"6\",\"aggregation\":\"COUNT\"}]");
-					
-					break;
-					
-				case "granularity":
-					
-					response.getWriter().println("[{\"id\":\"1\",\"name\":\"month\"},{\"id\":\"2\",\"name\":\"week\"},{\"id\":\"3\",\"name\":\"day\"},{\"id\":\"4\",\"name\":\"hour\"},{\"id\":\"5\",\"name\":\"minute\"},{\"id\":\"6\",\"name\":\"second\"}]");
-					
-					break;
-					*/
 				default:
 					
 					//getting info from de DB
@@ -1163,24 +1144,36 @@ public class Main extends HttpServlet {
 
 	public void init() {
 		ServletContext context = getServletContext();
-		logPath = File.separator+"home"
-				+File.separator+"proasense"
-				+File.separator+"proasenseModeller"
-				+File.separator+"KPIrepMaven"
-				+File.separator;
-		// Database that needs to be used IMPORTANT:has its identifiers as
-		// uppercase
-		dbPath = File.separator+"home"
-				+File.separator+"proasense"
-				+File.separator+"proasenseModeller"
-				+File.separator+"KPIrepMaven"
-				+File.separator+"db"
-				+File.separator;
 		
-		System.out.println("\n\n\n######################################################################################\n");
-		System.out.println("Caminho -> " + logPath);
-		System.out.println("Caminho -> " + dbPath);
-		System.out.println("\n######################################################################################\n\n\n");
+		if(SystemUtils.IS_OS_UNIX){
+			logPath = File.separator+"home"
+					+File.separator+"proasense"
+					+File.separator+"proasenseModeller"
+					+File.separator+"KPIrepMaven"
+					+File.separator;
+			// Database that needs to be used IMPORTANT:has its identifiers as
+			// uppercase
+			dbPath = File.separator+"home"
+					+File.separator+"proasense"
+					+File.separator+"proasenseModeller"
+					+File.separator+"KPIrepMaven"
+					+File.separator+"db"
+					+File.separator;
+		}else{
+			logPath = System.getProperty("user.home")
+					+File.separator+"proasense"
+					+File.separator+"proasenseModeller"
+					+File.separator+"KPIrepMaven"
+					+File.separator;
+			// Database that needs to be used IMPORTANT:has its identifiers as
+			// uppercase
+			dbPath = System.getProperty("user.home")
+					+File.separator+"proasense"
+					+File.separator+"proasenseModeller"
+					+File.separator+"KPIrepMaven"
+					+File.separator+"db"
+					+File.separator;
+		}
 		
 		dbConfig = new DBConfig("jdbc:hsqldb:file:" + dbPath, "", "SA", "");
 		dAO = new DatabaseAccessObject(dbPath, logPath);
@@ -1189,10 +1182,6 @@ public class Main extends HttpServlet {
 		System.out.println("Database path: " + dbPath);
 		System.out.println("LogSystem configured in: " + logPath);
 		 
-		this.SRCM = new StorageRESTClientManager();
-		
-		kpiID=1;
-		formulaID=1;
-		sensorEventID=1;		
+		this.SRCM = new StorageRESTClientManager();	
 	}
 }

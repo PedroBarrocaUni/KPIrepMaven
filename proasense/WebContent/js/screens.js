@@ -569,6 +569,8 @@ function Screen1(elInfo) {
 							sEnv = sensorEvents[idx];
 							break;
 						}
+					
+					alert(JSON.stringify(sEnv));
 										
 					//this.updateField('selectSensor1',sEnv.sensorname);
 					$('#selectSensor1 option[value="'+ sEnv.sensorid +'"]').prop('selected',true);
