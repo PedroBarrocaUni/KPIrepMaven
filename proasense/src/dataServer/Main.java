@@ -1163,14 +1163,14 @@ public class Main extends HttpServlet {
 
 	public void init() {
 		ServletContext context = getServletContext();
-		logPath = System.getProperty("user.home")
+		logPath = File.separator+"home"
 				+File.separator+"proasense"
 				+File.separator+"proasenseModeller"
 				+File.separator+"KPIrepMaven"
 				+File.separator;
 		// Database that needs to be used IMPORTANT:has its identifiers as
 		// uppercase
-		dbPath = System.getProperty("user.home")
+		dbPath = File.separator+"home"
 				+File.separator+"proasense"
 				+File.separator+"proasenseModeller"
 				+File.separator+"KPIrepMaven"
