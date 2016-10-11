@@ -915,6 +915,7 @@ public class Main extends HttpServlet {
 						
 						storageModelObject.put("kpiId", obj.get("id"));
 						storageModelObject.put("kpiName", obj.get("name"));
+						storageModelObject.put("context", obj.get("hella"));
 						storageModelObject.put("kpiDescription", obj.get("description"));
 						storageModelObject.put("kpiOperation", "ADD");
 						storageModelObject.put("operation", operation);
@@ -968,6 +969,7 @@ public class Main extends HttpServlet {
 							
 							storageModelObject.put("kpiId", obj.get("id"));
 							storageModelObject.put("kpiName", obj.get("name"));
+							storageModelObject.put("context", obj.get("hella"));
 							storageModelObject.put("kpiDescription", obj.get("description"));
 							storageModelObject.put("kpiOperation", "ADD");
 							storageModelObject.put("operation", operation);
