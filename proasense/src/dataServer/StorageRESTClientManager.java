@@ -186,7 +186,7 @@ public class StorageRESTClientManager {
             HttpPost
             query = new HttpPost(storageURL);
             query.setHeader("Content-type", "application/json");
-            query.setHeader("Body", kpiInfo);
+            query.setEntity(new StringEntity(kpiInfo));
             
             System.out.println("\n\n\n########################################################################################################\n\n\n");
             System.out.println(kpiInfo);
