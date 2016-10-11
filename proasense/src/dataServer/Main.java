@@ -65,7 +65,7 @@ public class Main extends HttpServlet {
 			// ################################################ variavel para
 			// utilizar storage ou valores de teste
 			// ###################################
-			boolean testing = false;
+			boolean testing = true;
 			// #################################################################################################################################################
 
 			DriverManager.registerDriver(new org.hsqldb.jdbcDriver());
@@ -889,6 +889,7 @@ public class Main extends HttpServlet {
 						
 						storageModelObject.put("kpiId", obj.get("id"));
 						storageModelObject.put("kpiName", obj.get("name"));
+						storageModelObject.put("context", obj.get("hella"));
 						storageModelObject.put("kpiDescription", obj.get("description"));
 						storageModelObject.put("kpiOperation", "ADD");
 						storageModelObject.put("operation", operation);
@@ -1145,6 +1146,12 @@ public class Main extends HttpServlet {
 	public void init() {
 		ServletContext context = getServletContext();
 
+		if(SystemUtils.IS_OS_UNIX){
+			
+			System.out.println("\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			System.out.println("Unix system!!");
+			System.out.println("\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			
 			logPath = File.separator+"home"
 					+File.separator+"proasense"
 					+File.separator+"proasenseModeller"
@@ -1158,7 +1165,28 @@ public class Main extends HttpServlet {
 					+File.separator+"KPIrepMaven"
 					+File.separator+"db"
 					+File.separator;
-
+		}else{
+			
+			System.out.println("\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			System.out.println("Other than Unix system : "+SystemUtils.OS_NAME+" !!");
+			System.out.println("\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			
+			
+			logPath = System.getProperty("user.home")
+					+File.separator+"proasense"
+					+File.separator+"proasenseModeller"
+					+File.separator+"KPIrepMaven"
+					+File.separator;
+			// Database that needs to be used IMPORTANT:has its identifiers as
+			// uppercase
+			dbPath = System.getProperty("user.home")
+					+File.separator+"proasense"
+					+File.separator+"proasenseModeller"
+					+File.separator+"KPIrepMaven"
+					+File.separator+"db"
+					+File.separator;
+			
+		}
 		
 		dbConfig = new DBConfig("jdbc:hsqldb:file:" + dbPath, "", "SA", "");
 		dAO = new DatabaseAccessObject(dbPath, logPath);
