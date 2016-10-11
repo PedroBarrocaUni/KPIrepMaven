@@ -109,9 +109,6 @@
              that are performed against this UserDatabase are immediately
              available for use by the Realm.  -->
         <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
-        <!--
-		<Realm className="org.apache.catalina.realm.JDBCRealm" connectionURL="jdbc:h2:tcp://localhost/~/authority;USER=dbuser;PASSWORD=dbpass" driverName="org.h2.Driver" roleNameCol="role_name" userCredCol="user_pass" userName="user_name" userRoleTable="user_roles" userTable="users"/>
-		-->
       </Realm>
 
       <Host appBase="webapps" autoDeploy="true" name="localhost" unpackWARs="true">

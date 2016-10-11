@@ -1144,8 +1144,7 @@ public class Main extends HttpServlet {
 
 	public void init() {
 		ServletContext context = getServletContext();
-		
-		if(SystemUtils.IS_OS_UNIX){
+
 			logPath = File.separator+"home"
 					+File.separator+"proasense"
 					+File.separator+"proasenseModeller"
@@ -1159,21 +1158,7 @@ public class Main extends HttpServlet {
 					+File.separator+"KPIrepMaven"
 					+File.separator+"db"
 					+File.separator;
-		}else{
-			logPath = System.getProperty("user.home")
-					+File.separator+"proasense"
-					+File.separator+"proasenseModeller"
-					+File.separator+"KPIrepMaven"
-					+File.separator;
-			// Database that needs to be used IMPORTANT:has its identifiers as
-			// uppercase
-			dbPath = System.getProperty("user.home")
-					+File.separator+"proasense"
-					+File.separator+"proasenseModeller"
-					+File.separator+"KPIrepMaven"
-					+File.separator+"db"
-					+File.separator;
-		}
+
 		
 		dbConfig = new DBConfig("jdbc:hsqldb:file:" + dbPath, "", "SA", "");
 		dAO = new DatabaseAccessObject(dbPath, logPath);

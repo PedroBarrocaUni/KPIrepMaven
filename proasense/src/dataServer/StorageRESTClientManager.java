@@ -26,6 +26,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -186,6 +187,7 @@ public class StorageRESTClientManager {
             HttpPost
             query = new HttpPost(storageURL);
             query.setHeader("Content-type", "application/json");
+            query.setHeader("Context", "hella");
             query.setEntity(new StringEntity(kpiInfo));
             
             System.out.println("\n\n\n########################################################################################################\n\n\n");
