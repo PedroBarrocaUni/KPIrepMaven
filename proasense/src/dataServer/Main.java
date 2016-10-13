@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.json.*;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -35,8 +35,6 @@ import dataServer.database.DBConfig;
 import dataServer.database.enums.SamplingInterval;
 import dataServer.database.enums.TableValueType;
 
-import eu.proasense.internal.*;
-
 @WebServlet("/data/*")
 public class Main extends HttpServlet {
 	
@@ -47,27 +45,29 @@ public class Main extends HttpServlet {
 	DatabaseAccessObject dAO;
 	
 	StorageRESTClientManager SRCM;
+	
+	// ################################################ variavel para
+	// utilizar storage ou valores de teste
+	// ###################################
+	boolean testing = false;
+	// #################################################################################################################################################
+
+				
 
 	public static Map<String, String> splitQuery(String query) throws UnsupportedEncodingException {
-		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-		String[] pairs = query.split("&");
-		for (String pair : pairs) {
-			int idx = pair.indexOf("=");
-			query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
-					URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
-		}
-		return query_pairs;
+	    Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+	    String[] pairs = query.split("&");
+	    for (String pair : pairs) {
+	        int idx = pair.indexOf("=");
+	        query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+	    }
+	    return query_pairs;
 	}
-
-	public void getData(HttpServletResponse response, String dbName, String tableName, String idReq,
-			String remoteAddress, String queryString) {
+	
+	public void getData(HttpServletResponse response,String dbName,String tableName,String idReq,String remoteAddress, String queryString)
+	{
 		try {
-			// ################################################ variavel para
-			// utilizar storage ou valores de teste
-			// ###################################
-			boolean testing = true;
-			// #################################################################################################################################################
-
+			
 			DriverManager.registerDriver(new org.hsqldb.jdbcDriver());
 			Map<String, String> queryParams = new LinkedHashMap<String, String>();
 
@@ -148,8 +148,7 @@ public class Main extends HttpServlet {
 					
 					//getting info from de DB
 					
-					Connection c = DriverManager.getConnection(dbConfig.jdbcURL + dbName, dbConfig.userName,
-							dbConfig.password);
+					Connection c = DriverManager.getConnection(dbConfig.jdbcURL + dbName, dbConfig.userName, dbConfig.password);
 					Statement s = c.createStatement();
 					// String query = "SELECT * FROM \""+tableName+"\"";
 					String query = "SELECT * FROM \"" + tableName.toUpperCase() + "\"";
@@ -462,8 +461,7 @@ public class Main extends HttpServlet {
 					.valueOf(getParamValueOf(requestData.get("contextualInformation").toUpperCase()));
 		}
 
-		SamplingInterval samplingInterval = SamplingInterval
-				.valueOf(getParamValueOf(requestData.get("granularity").toUpperCase()));
+		SamplingInterval samplingInterval = SamplingInterval.valueOf(getParamValueOf(requestData.get("granularity").toUpperCase()));
 		String startTimeStr = requestData.get("startTime");
 		String endTimeStr = requestData.get("endTime");
 
@@ -479,9 +477,16 @@ public class Main extends HttpServlet {
 		}
 
 		String secondContextStr = requestData.get("secondContext");
-		TableValueType secondContext = TableValueType.NONE;
-		if (secondContextStr != null) {
-			secondContext = TableValueType.valueOf(getParamValueOf(requestData.get("secondContext").toUpperCase()));
+		TableValueType secondContext = TableValueType.NONE; 
+		if ( secondContextStr != null){
+			secondContext = TableValueType.valueOf(getParamValueOf(requestData.get("secondContext").toUpperCase()));	
+		}
+		
+		String includeGlobalStr = requestData.get("includeGlobal");
+		
+		boolean includeGlobal = true;
+		if ( includeGlobalStr != null){
+			includeGlobal = includeGlobalStr.equals("true") ? true : false; 
 		}
 		
 		try {
@@ -494,7 +499,7 @@ public class Main extends HttpServlet {
 			// writeLogMsg("--------------- START GRAPH DATA --- data method
 			// start -------------------");
 			Object data = dAO.getData(kpiId, tableValueType, samplingInterval, startTime, endTime, contextValueId,
-					secondContext);
+					secondContext, includeGlobal);
 			// writeLogMsg("--------------- START GRAPH DATA --- data method
 			// over -------------------");
 			Object legend = dAO.getLegends();
@@ -538,76 +543,79 @@ public class Main extends HttpServlet {
 			return new JSONObject();
 		}
 	}
-	
-	private String getParamValueOf(String paramString) {
-		return paramString.substring(paramString.indexOf("=") + 1);
+private String getParamValueOf(String paramString){
+		return paramString.substring(paramString.indexOf("=")+1);
 	}
-
-	public Object getHeatMapData(Map<String, String> requestData) {
+	
+	public Object getHeatMapData(Map<String,String> requestData)
+	{
 		Integer kpiId = Integer.parseInt(requestData.get("kpiId"));
-
+		
 		TableValueType tableValueType = TableValueType.NONE;
-		if ((requestData.get("contextualInformation")).equals(null)
-				|| ((requestData.get("contextualInformation")).equals(""))) {
+		if ( (requestData.get("contextualInformation")).equals(null) || ((requestData.get("contextualInformation")).equals("")) ){
 			tableValueType = TableValueType.NONE;
-		} else {
-			tableValueType = TableValueType
-					.valueOf(getParamValueOf(requestData.get("contextualInformation").toUpperCase()));
 		}
-
+		else
+		{
+			tableValueType = TableValueType.valueOf(getParamValueOf(requestData.get("contextualInformation").toUpperCase()));
+		}
+		
 		Timestamp startTime = null;
 		Timestamp endTime = null;
 		String startTimeStr = requestData.get("startTime");
 		String endTimeStr = requestData.get("endTime");
 
-		if ((startTimeStr != null) && (endTimeStr != null)) {
-			writeLogMsg("requestData startTime:" + requestData.get("startTime"));
+		SamplingInterval samplingInterval = SamplingInterval.valueOf(getParamValueOf(requestData.get("granularity").toUpperCase()));
+		
+		if ( ( startTimeStr != null ) && ( endTimeStr != null))  {
+			writeLogMsg("requestData startTime:"+requestData.get("startTime"));
 			startTime = new Timestamp(Long.parseLong(requestData.get("startTime")));
 			endTime = new Timestamp(Long.parseLong(requestData.get("endTime")));
-			writeLogMsg("after startTime long parse:" + startTime);
+			writeLogMsg("after startTime long parse:"+startTime);
+			if (samplingInterval == SamplingInterval.MONTHLY) {
+				java.util.Date monthlyDate;
+			}
+			
 		}
 
-		SamplingInterval samplingInterval = SamplingInterval
-				.valueOf(getParamValueOf(requestData.get("granularity").toUpperCase()));
-
 		String contextName = requestData.get("contextName");
-
+		
 		TableValueType varX = TableValueType.NONE;
 		TableValueType varY = TableValueType.NONE;
 
-		if ((requestData.get("varX")).equals(null) || (requestData.get("varY")).equals(null)
-				|| ((requestData.get("varX")).equals("")) || ((requestData.get("varY")).equals(""))) {
+		if ( (requestData.get("varX")).equals(null) || (requestData.get("varY")).equals(null) || 
+				((requestData.get("varX")).equals("")) || ((requestData.get("varY")).equals("")) ){
 			varX = TableValueType.NONE;
 			varY = TableValueType.NONE;
-		} else {
+		}
+		else
+		{
 			varX = TableValueType.valueOf(getParamValueOf(requestData.get("varX").toUpperCase()));
 			varY = TableValueType.valueOf(getParamValueOf(requestData.get("varY").toUpperCase()));
 		}
 
-		
-		try {
+		try
+		{
 			JSONObject obj = new JSONObject();
 			JSONParser parser = new JSONParser();
 
 			writeLogMsg("---------- START HEATMAP DATA -------------------------");
-
-			Object data = dAO.getHeatMapData(kpiId, tableValueType, startTime, endTime, samplingInterval, contextName,
-					varX, varY);
+			
+			Object data = dAO.getHeatMapData(kpiId, tableValueType, startTime, endTime, samplingInterval, contextName, varX, varY);
 			Object yLabels = dAO.getHeatMapYLabels();
 			Object xLabels = dAO.getHeatMapXLabels();
-			String varXStr = varX.equals(TableValueType.NONE) ? "" : "per " + varX.toString().toLowerCase();
-			String varYStr = varY.equals(TableValueType.NONE) ? "" : "per " + varY.toString().toLowerCase();
-			Object title = dAO.getTitle(kpiId) + " " + varYStr + " " + varXStr + " of " + contextName + " from "
-					+ dAO.getLabelName(SamplingInterval.HOURLY, startTime.toString(), true).toString().toLowerCase()
-					+ " to "
-					+ dAO.getLabelName(SamplingInterval.HOURLY, endTime.toString(), true).toString().toLowerCase();
-			writeLogMsg("HeatMap title: " + title);
-
-			writeLogMsg("---------- HEATMAP DATA -------------------------------");
-			writeLogMsg("Data: " + data.toString());
-			writeLogMsg("xLabels: " + xLabels.toString());
-			writeLogMsg("yLabels: " + yLabels.toString());
-			writeLogMsg("Title: " + title.toString());
+			String varXStr = varX.equals(TableValueType.NONE)?"":"per "+varX.toString().toLowerCase();
+			String varYStr = varY.equals(TableValueType.NONE)?"":"per "+varY.toString().toLowerCase();
+			Object title = dAO.getTitle(kpiId) + " " + varYStr + " " + varXStr + " of " 
+						 + contextName + " from " + dAO.getLabelName(SamplingInterval.HOURLY, startTime.toString(), true).toString().toLowerCase()
+						 + " to " + dAO.getLabelName(SamplingInterval.HOURLY, endTime.toString(), true).toString().toLowerCase();
+			writeLogMsg("HeatMap title: "+title);
+			
+			writeLogMsg("---------- HEATMAP DATA -------------------------------"); 
+			writeLogMsg("Data: "+data.toString());
+			writeLogMsg("xLabels: "+xLabels.toString());
+			writeLogMsg("yLabels: "+yLabels.toString());
+			writeLogMsg("Title: "+title.toString());
 			writeLogMsg("---------- END HEATMAP DATA ---------------------------");
 
 			obj.put("data", data);
@@ -615,7 +623,9 @@ public class Main extends HttpServlet {
 			obj.put("yLabels", yLabels);
 			obj.put("title", title);
 			return obj;
-		} catch (Exception e) {
+		}
+		catch(Exception e)
+		{
 			writeLogMsg(e.getMessage());
 			return "";
 		}
@@ -698,38 +708,6 @@ public class Main extends HttpServlet {
 				e1.printStackTrace();
 			}
 		}
-		/*
-		try {
-			switch(tableName){
-				case "kpi":
-									
-					response.getWriter().println(
-							"{\"succeeded\":true,\"result\":\" 1 records added\",\"insertId\":[" + this.kpiID++ + "]}");
-					break;
-				
-				case "kpi_formula":
-	
-					response.getWriter().println(
-							"{\"succeeded\":true,\"result\":\" 1 records added\",\"insertId\":[" + this.formulaID++ + "]}");
-					break;
-					
-				case "sensorevent":
-	
-					response.getWriter().println(
-							"{\"succeeded\":true,\"result\":\" 1 records added\",\"insertId\":[" + this.sensorEventID++ + "]}");
-					break;
-				
-				default:
-					
-					System.out.println("\n\nTable name: "+ tableName);
-					break;
-			
-			}
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}*/
-
 	}
 
 	//update data in de DB
@@ -819,30 +797,6 @@ public class Main extends HttpServlet {
 				e1.printStackTrace();
 			}
 		}
-		/*
-		try {
-			switch(tableName){
-				case "kpi":
-									
-					break;				
-				case "kpi_formula":
-	
-					break;					
-				case "sensorevent":
-	
-					break;				
-				default:
-					
-					System.out.println("\n\nTable name: "+ tableName);
-					break;
-			
-			}
-			response.getWriter().println("{\"succeeded\":\"true\",\"result\":\" 1 records deleted\"}");
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}*/
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -855,8 +809,14 @@ public class Main extends HttpServlet {
 
 			switch(informType){
 			case "delete":
+				if(testing){
+					System.out.println("\n\n################################################################################\n");
+					System.out.println("Envia inform do tipo delete com :");
+					System.out.println(obj.get("id").toString());
+					System.out.println("\n################################################################################\n\n");
+				}else
+					SRCM.deleteKPIStorage(obj.get("id").toString());
 				
-				SRCM.deleteKPIStorage(obj.get("id").toString());
 				break;
 			case "insert":
 				
@@ -889,7 +849,7 @@ public class Main extends HttpServlet {
 						
 						storageModelObject.put("kpiId", obj.get("id"));
 						storageModelObject.put("kpiName", obj.get("name"));
-						storageModelObject.put("context", obj.get("hella"));
+						storageModelObject.put("Context", "hella");
 						storageModelObject.put("kpiDescription", obj.get("description"));
 						storageModelObject.put("kpiOperation", "ADD");
 						storageModelObject.put("operation", operation);
@@ -915,7 +875,7 @@ public class Main extends HttpServlet {
 						
 						storageModelObject.put("kpiId", obj.get("id"));
 						storageModelObject.put("kpiName", obj.get("name"));
-						storageModelObject.put("context", obj.get("hella"));
+						storageModelObject.put("Context", "hella");
 						storageModelObject.put("kpiDescription", obj.get("description"));
 						storageModelObject.put("kpiOperation", "ADD");
 						storageModelObject.put("operation", operation);
@@ -969,7 +929,7 @@ public class Main extends HttpServlet {
 							
 							storageModelObject.put("kpiId", obj.get("id"));
 							storageModelObject.put("kpiName", obj.get("name"));
-							storageModelObject.put("context", obj.get("hella"));
+							storageModelObject.put("Context", "hella");
 							storageModelObject.put("kpiDescription", obj.get("description"));
 							storageModelObject.put("kpiOperation", "ADD");
 							storageModelObject.put("operation", operation);
@@ -982,7 +942,14 @@ public class Main extends HttpServlet {
 						break;
 				}
 				
-				SRCM.insertKPIStorage(storageModelObject.toString());
+				if(testing){
+					System.out.println("\n\n################################################################################\n");
+					System.out.println("Envia inform do tipo add com :");
+					System.out.println(storageModelObject.toString());
+					System.out.println(storageModelObject.toJSONString());
+					System.out.println("\n################################################################################\n\n");
+				}else
+					SRCM.insertKPIStorage(storageModelObject.toString());
 				
 				break;
 			case "update":
@@ -1028,7 +995,7 @@ public class Main extends HttpServlet {
 		// String requestParamTP = baseRequest.getParameter("tp");
 		// String requestParams6 = baseRequest.getServletPath();
 		writeLogMsg(method + " Request from: " + remoteAddress + " Request target: " + target);
-		System.out.println("\n\n"+method + " Request from: " + remoteAddress + " Request target: " + target);
+		//System.out.println("\n\n"+method + " Request from: " + remoteAddress + " Request target: " + target);
 		writeReceivedHeadersToLog(baseRequest);
 
 		String[] parts = target.split("/");
@@ -1081,16 +1048,36 @@ public class Main extends HttpServlet {
 						Object reqData = tmpObj.get("data");
 
 						if (type != null) {
-							if (type.equals("GET")) {
+
+							if (type.equals("GET")) 
+							{
+
 								getData(response, dbName, tableName, idReq, remoteAddress, queryString);
-							} else if (type.equals("INSERT") && reqData != null) {
+							} 
+							else if (type.equals("INSERT") && reqData != null) 
+							{
 								insertData(response, dbName, tableName, reqData, remoteAddress);
-							} else if (type.equals("UPDATE") && reqData != null) {
+							} 
+							else if (type.equals("UPDATE") && reqData != null) 
+							{
 								updateData(response, dbName, tableName, reqData, remoteAddress);
-							} else if (type.equals("DELETE") && reqData != null) {
+							} 
+							else if (type.equals("DELETE") && reqData != null) 
+							{
 								deleteData(response, dbName, tableName, reqData, remoteAddress);
-							} else if (type.equals("INFORM") && reqData != null) {
+							} 
+							else if (type.equals("INFORM") && reqData != null) 
+							{
 								informData(response, dbName, tableName, reqData, remoteAddress);
+							} 
+							else if (type.equals("LOGOUT")) {
+								writeLogMsg("LOGOUT request received");
+//								response.getWriter().println("{\"succeeded\":"+"true"+",\"result\":\"Logout ok\"}");
+								response.setHeader("Cache-Control","no-cache,no-store,must-revalidate");
+								response.setHeader("Pragma","no-cache");
+								response.setDateHeader("Expires", 0);								
+								response.sendError(response.SC_UNAUTHORIZED, "You are not authorized to enter PROASENSE.");
+
 							}
 						}
 
@@ -1147,13 +1134,8 @@ public class Main extends HttpServlet {
 
 	public void init() {
 		ServletContext context = getServletContext();
-
+		
 		if(SystemUtils.IS_OS_UNIX){
-			
-			System.out.println("\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
-			System.out.println("Unix system!!");
-			System.out.println("\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
-			
 			logPath = File.separator+"home"
 					+File.separator+"proasense"
 					+File.separator+"proasenseModeller"
@@ -1168,12 +1150,6 @@ public class Main extends HttpServlet {
 					+File.separator+"db"
 					+File.separator;
 		}else{
-			
-			System.out.println("\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
-			System.out.println("Other than Unix system : "+SystemUtils.OS_NAME+" !!");
-			System.out.println("\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
-			
-			
 			logPath = System.getProperty("user.home")
 					+File.separator+"proasense"
 					+File.separator+"proasenseModeller"
@@ -1187,7 +1163,6 @@ public class Main extends HttpServlet {
 					+File.separator+"KPIrepMaven"
 					+File.separator+"db"
 					+File.separator;
-			
 		}
 		
 		dbConfig = new DBConfig("jdbc:hsqldb:file:" + dbPath, "", "SA", "");

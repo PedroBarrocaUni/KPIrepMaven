@@ -217,6 +217,14 @@
 /*     background-color: navy; */
 }
 
+.form-control-custom2 {
+/*    /* min-width: 0; */
+/*     width: auto; */
+    display: inline;
+    
+/*     background-color: navy; */
+}
+
 .form-control-custom option {
 	text-align:left;
 }
@@ -229,4 +237,100 @@
 
 .calendar-hidden {
 	display:none
+}
+
+.samplingRate td:nth-child(2) {
+	width: 20%;
+}
+
+#samplingInterval {
+	width : 10%;
+}
+
+.select-7 {
+	width : 7%;
+}
+
+.select-10 {
+	width : 10%;
+}
+
+.select-15 {
+	width : 15%;
+}
+
+.select-20 {
+	width : 20%;
+}
+
+.select-25 {
+	width : 25%;
+}
+
+.select-30 {
+	width : 30%;
+}
+
+.select-35 {
+	width : 35%;
+}
+
+.select-40 {
+	width : 40%;
+}
+
+.select-45 {
+	width : 45%;
+}
+
+.select-50 {
+	width : 50%;
+}
+
+.select-55 {
+	width : 55%;
+}
+
+.select-60 {
+	width : 60%;
+}
+
+.select-65 {
+	width : 65%;
+}
+
+.select-70 {
+	width : 70%;
+}
+
+.select-75 {
+	width : 75%;
+}
+
+.select-80 {
+	width : 80%;
+}
+
+.select-85 {
+	width : 85%;
+}
+
+.select-90 {
+	width : 90%;
+}
+
+.select-95 {
+	width : 95%;
+}
+
+.select-100 {
+	width : 100%;
+}
+
+#calculationType {
+	min-width: 175px;
+}
+
+#numberSupport {
+	min-width: 100px;
 }

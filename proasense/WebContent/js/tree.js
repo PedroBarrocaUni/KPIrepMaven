@@ -63,6 +63,7 @@ var machines = [];
 var loadedKpi = "";
 var loadedKpiNumberFormat = "";
 var newParentId = null;
+var loadedTargetToEditId = null;
 
 function cloneKpis(kpis) {
 	var tmpKpis = [];
@@ -286,8 +287,27 @@ window.onload = function() {
 			if (data.event.offsetX < ($('#' + data.node.id).find('a').width() - 47) && data.event.target.classList[0] != "glyphicon") {
 				loadedKpi = data.node.id;
 				loadedKpiNumberFormat = getKpiNumberSupportFormat(loadedKpi);
-				scrGraph.openScreen(data.node.id);
-//				document.getElementById("targetLinkId").onclick="openTarget();";
+				
+				var selectedElement = -1;
+				var vectorSize = $('.headerSelector a').length;
+				
+				for (var index=0; index<vectorSize;index++){
+					if (!$('.headerSelector a').eq(index).hasClass("notSelected")) {
+						selectedElement = index;
+						break;
+					}
+				}
+				
+				switch (selectedElement) {
+				case 0: // means KPI separator is selected
+						scrGraph.openScreen(data.node.id);
+						break;
+				case 1: // means Target separator is selected
+						screen2.openScreen(data.node.id);
+						break;
+				default: // means no separator is selected
+						break;
+				}
 			}
 		})
 		.on('create_node.jstree', function(e, data) {

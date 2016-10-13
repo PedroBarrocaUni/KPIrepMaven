@@ -191,7 +191,7 @@ function removeElement(delId) {
 		newParentId = null;
 		activeScreen.closeScreen();
 	}
-	if (!screen1.checkConstraints(delId)) {
+	if ( (!screen1.checkConstraints(delId)) && (!screen1.checkParentConstraints(delId)) ) {
 		$('html').block({
 			'message': null
 		});
