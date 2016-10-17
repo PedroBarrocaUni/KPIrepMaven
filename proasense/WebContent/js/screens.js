@@ -70,14 +70,14 @@ function Screen1(elInfo) {
 			$('#eventType1').hide();
 			$('#eventType1').html("Type: ");	
 			//reset textbox
-			$('#eventTypeValue1').hide();
-			$('#eventTypeValue1').attr('value',"Event value");
+			//$('#eventTypeValue1').hide();
+			//$('#eventTypeValue1').attr('value',"Event value");
 		//aggregate
 			$('#eventType2').hide();
 			$('#eventType2').html("Type: ");	
 			//reset textbox
-			$('#eventTypeValue2').hide();
-			$('#eventTypeValue2').attr('value',"Event value");
+			//$('#eventTypeValue2').hide();
+			//$('#eventTypeValue2').attr('value',"Event value");
 		//Composed
 			$('#eventType3').hide();
 			$('#eventType3').html("Type: ");
@@ -86,12 +86,12 @@ function Screen1(elInfo) {
 			$('#eventType5').hide();
 			$('#eventType5').html("Type: ");	
 			//reset textbox
-			$('#eventTypeValue3').hide();
-			$('#eventTypeValue3').attr('value',"Event value");
-			$('#eventTypeValue4').hide();
-			$('#eventTypeValue4').attr('value',"Event value");
-			$('#eventTypeValue5').hide();
-			$('#eventTypeValue5').attr('value',"Event value");
+			//$('#eventTypeValue3').hide();
+			//$('#eventTypeValue3').attr('value',"Event value");
+			//$('#eventTypeValue4').hide();
+			//$('#eventTypeValue4').attr('value',"Event value");
+			//$('#eventTypeValue5').hide();
+			//$('#eventTypeValue5').attr('value',"Event value");
 			
 		//hide partition when calculation type changes
 		$('.partitionSelection').hide();
@@ -117,8 +117,8 @@ function Screen1(elInfo) {
 			$('#eventType2').hide();
 			$('#eventType2').html("Type: ");	
 			//reset textbox
-			$('#eventTypeValue2').hide();
-			$('#eventTypeValue2').attr('value',"Event value");
+			//$('#eventTypeValue2').hide();
+			//$('#eventTypeValue2').attr('value',"Event value");
 		}
 
 		//hide and reset partition section
@@ -133,7 +133,7 @@ function Screen1(elInfo) {
 		$('.elRow').css('display', 'table-row'); // mostra a linha
 		var kpiSensors = $('.kpiSensor'); //
 		for (var i = 0; i < kpiSensors.length; i++) {
-			if (kpiSensors.eq(i).val() == 'sensor') {
+			if (kpiSensors.eq(i).val() == 'sensor') {				
 				$('.sensorChoice').eq(i).css('display', 'inline-block');
 				$('.kpiChoice').eq(i).css('display', 'none');
 				
@@ -150,7 +150,7 @@ function Screen1(elInfo) {
 				$('#eventType'+id).html("Type: ");	
 				//reset textbox
 				$('#eventTypeValue'+id).hide();
-				$('#eventTypeValue'+id).attr('value',"Event value");
+				//$('#eventTypeValue'+id).attr('value',"Event value");
 			}
 		}
 	}
@@ -184,8 +184,8 @@ function Screen1(elInfo) {
 			$('#eventType1').hide();
 			$('#eventType1').html("Type: ");	
 			//reset textbox
-			$('#eventTypeValue1').hide();
-			$('#eventTypeValue1').attr('value',"Event value");	
+			//$('#eventTypeValue1').hide();
+			//$('#eventTypeValue1').attr('value',"Event value");	
 
 			//reset partition option
 			$('.partitionSelection').hide();
@@ -221,8 +221,8 @@ function Screen1(elInfo) {
 			$('#eventType2').hide();
 			$('#eventType2').html("Type: ");	
 			//reset textbox
-			$('#eventTypeValue2').hide();
-			$('#eventTypeValue2').attr('value',"Event value");
+			//$('#eventTypeValue2').hide();
+			//$('#eventTypeValue2').attr('value',"Event value");
 
 			//reset partition option
 			$('.partitionSelection').hide();
@@ -260,14 +260,46 @@ function Screen1(elInfo) {
 			$('#eventType'+id).hide();
 			$('#eventType'+id).html("Type: ");	
 			//reset textbox
-			$('#eventTypeValue'+id).hide();
-			$('#eventTypeValue'+id).attr('value',"Event value");
+			//$('#eventTypeValue'+id).hide();
+			//$('#eventTypeValue'+id).attr('value',"Event value");
 			break;
 		default:
 			window.alert('default load sensor');
 		}
 	}
 
+	
+	this.loadEventPropertiesAsync = function(id) {	
+		
+		var sensorId = $('#selectSensor'+id).val();
+		// get sensor events
+		$.ajax({
+			url : restAddress + 'proasense_hella/sensorProperties/'
+					+ sensorId,
+			type : 'GET',
+			async: false ,
+			success : function(events) {
+
+				$('#selectSensorEvent'+id).find('option:gt(0)').remove();
+				$('#selectSensorEvent'+id).append('<option value="" disabled selected hidden>Select Event</option>');					
+				for (var i = 0; i < events.length; i++) {
+					$('#selectSensorEvent'+id).append(
+							'<option type=' + events[i].type
+									+ ' partition=' + events[i].partition
+									+ '>' + events[i].name + '</option>');
+				}
+			}
+		});
+		$('#selectSensorEvent'+id).css('display', 'block');
+		
+		//reset event type
+		$('#eventType'+id).hide();
+		$('#eventType'+id).html("Type: ");	
+		//reset textbox
+		//$('#eventTypeValue'+id).hide();
+		//$('#eventTypeValue'+id).attr('value',"Event value");
+	
+	}
 	this.changeTypeAndPartition = function() {
 		var sensorEventPartitionable;
 		switch ($('#calculationType').val()) {
@@ -279,8 +311,8 @@ function Screen1(elInfo) {
 			$('#eventType1').css('display', 'block')
 			$('#eventType1').html('Type: '+sensorEventType);
 			//enable textBox
-			$('#eventTypeValue1').css('display', 'block');
-			$('#eventTypeValue1').attr('value',"Event value");
+			//$('#eventTypeValue1').css('display', 'block');
+			//$('#eventTypeValue1').attr('value',"Event value");
 			
 			if (sensorEventPartitionable == "TRUE") {
 				$('.partitionSelection').show();
@@ -300,8 +332,8 @@ function Screen1(elInfo) {
 			$('#eventType2').css('display', 'block')
 			$('#eventType2').html('Type: '+sensorEventType);
 			//enable textBox
-			$('#eventTypeValue2').css('display', 'block');
-			$('#eventTypeValue2').attr('value',"Event value");
+			//$('#eventTypeValue2').css('display', 'block');
+			//$('#eventTypeValue2').attr('value',"Event value");
 			
 			if (sensorEventPartitionable == "TRUE") {
 				$('.partitionSelection').show();
@@ -336,13 +368,39 @@ function Screen1(elInfo) {
 			$('#eventType'+id).css('display', 'block')
 			$('#eventType'+id).html('Type: '+sensorEventType);
 			//enable textBox
-			$('#eventTypeValue'+id).css('display', 'block');
-			$('#eventTypeValue'+id).attr('value',"Event value");
+			//$('#eventTypeValue'+id).css('display', 'block');
+			//$('#eventTypeValue'+id).attr('value',"Event value");
 			break;
 		default:
 			window.alert('default partition');
 		}
 		
+	}
+	
+this.changeTypeAndPartitionAsync = function(id) {	
+		
+	var sensorEventType = $('#selectSensorEvent'+id).find(":selected").attr("type");
+	
+	if($('.partitionSelection').is(":visible")){
+		if($('#selectSensorEvent3').find(":selected").attr("partition").toUpperCase()== "FALSE"
+				&& $('#selectSensorEvent4').find(":selected").attr("partition").toUpperCase()== "FALSE"
+					&& $('#selectSensorEvent5').find(":selected").attr("partition").toUpperCase()== "FALSE"){
+					$('.partitionSelection').hide();
+					$('#NonePartition').prop("checked",true);
+					$('#partitionOptions').css('display', 'none');
+					$('#partitionOptions').find('option:gt(0)').remove();
+					$('#partitionOptions').append('<option value="" disabled selected hidden>Select Partition ID</option>');
+				}
+	}else
+		if($('#selectSensorEvent'+id).find(":selected").attr("partition").toUpperCase()== "TRUE")
+			$('.partitionSelection').show();
+	
+	$('#eventType'+id).css('display', 'block')
+	$('#eventType'+id).html('Type: '+sensorEventType);
+	//enable textBox
+	//$('#eventTypeValue'+id).css('display', 'block');
+	//$('#eventTypeValue'+id).attr('value',"Event value");
+	
 	}
 
 	this.changePartitionIDs = function(asynchronous) {
@@ -553,6 +611,8 @@ function Screen1(elInfo) {
 				$('#numberSupport').prop("disabled",false);
 				$('#numberSupport option[value="'+ el.number_support.toLowerCase() +'"]').prop('selected',true);
 				
+				$('#companyContext option[value="'+ el.company_context +'"]').prop('selected',true);
+				
 				var kpiFormula = {};
 				for (var j = 0; j < kpiFormulas.length; j++) {
 					if (kpiFormulas[j].kpi_id == el.id) {
@@ -585,9 +645,8 @@ function Screen1(elInfo) {
 					this.loadEventProperties(false);
 					//set event
 					$('#selectSensorEvent1').val(sEnv.eventname).prop('selected',true);
-					this.changeTypeAndPartition();
-					
-					//this.updateField('eventTypeValue1', sEnv.eventtype);
+					this.changeTypeAndPartition();					
+					//this.updateField('eventTypeValue1', sEnv.eventtypevalue);
 					
 					if(sEnv.eventpartition != null)
 						showpartition = true;
@@ -595,11 +654,10 @@ function Screen1(elInfo) {
 					break;
 				case 'aggregate':
 				
-
 					$('#selectAggType option[id="'+ el.aggregation +'"]').prop('selected',true);
 					
-					
 					if(kpiFormula.term1_sensor_id != null){
+						
 						//sensor based
 						$('#kpiSensor1 option[value="sensor"]').prop('selected',true);
 						this.kpiSensor1();
@@ -609,9 +667,7 @@ function Screen1(elInfo) {
 							if(sensorEvents[idx].id == kpiFormula.term1_sensor_id){
 								sEnv = sensorEvents[idx];
 								break;
-							}
-
-						alert(JSON.stringify(sEnv));
+						}
 						
 						//this.updateField('selectSensor1',sEnv.sensorname);
 						$('#selectSensor2 option[value="'+ sEnv.sensorid +'"]').prop('selected',true);
@@ -619,7 +675,8 @@ function Screen1(elInfo) {
 						this.loadEventProperties(false);
 						//set event
 						$('#selectSensorEvent2').val(sEnv.eventname).prop('selected',true);
-						this.changeTypeAndPartition();
+						this.changeTypeAndPartition();					
+						//this.updateField('eventTypeValue2', sEnv.eventtypevalue);
 					}else{
 						//kpi based
 						$('#kpiSensor1 option[value="kpi"]').prop('selected',true);
@@ -628,19 +685,76 @@ function Screen1(elInfo) {
 						//choose the correspondent kpi 
 						
 					}
-					
-					//this.updateField('eventTypeValue1', sEnv.eventtype);
-					
+										
 					if(sEnv.eventpartition != null)
 						showpartition = true;
 					
 					break;
 				case 'composed':
 					
-					if(true){
-						$.notify('Not Supported yet');
-						return;
+					if(kpiFormula.term1_sensor_id != null){
+						
+						//sensor based
+						$('#kpiSensor2 option[value="sensor"]').prop('selected',true);
+						this.kpiSensor();
+						//get sensor configurations
+						var sEnv = {};
+						for(var idx = 0 ; idx < sensorEvents.length ; idx++)
+							if(sensorEvents[idx].id == kpiFormula.term1_sensor_id){
+								sEnv = sensorEvents[idx];
+								break;
+						}						
+						//this.updateField('selectSensor1',sEnv.sensorname);
+						$('#selectSensor3 option[value="'+ sEnv.sensorid +'"]').prop('selected',true);
+						//get sensor properties
+						this.loadEventPropertiesAsync(3);
+						//set event
+						$('#selectSensorEvent3').val(sEnv.eventname).prop('selected',true);
+						this.changeTypeAndPartitionAsync(3);					
+						//this.updateField('eventTypeValue2', sEnv.eventtypevalue);
+					}else{
+						//kpi based
+						$('#kpiSensor2 option[value="kpi"]').prop('selected',true);
+						this.kpiSensor();
+						
+						//choose the correspondent kpi 
+						
 					}
+					
+					$('#op1 option[value="'+ kpiFormula.operator_1 +'"]').prop('selected',true);
+					
+					if(kpiFormula.term2_sensor_id != null){
+						
+						//sensor based
+						$('#kpiSensor3 option[value="sensor"]').prop('selected',true);
+						this.kpiSensor();
+						//get sensor configurations
+						var sEnv = {};
+						for(var idx = 0 ; idx < sensorEvents.length ; idx++)
+							if(sensorEvents[idx].id == kpiFormula.term1_sensor_id){
+								sEnv = sensorEvents[idx];
+								break;
+						}
+
+						//this.updateField('selectSensor1',sEnv.sensorname);
+						$('#selectSensor4 option[value="'+ sEnv.sensorid +'"]').prop('selected',true);
+						//get sensor properties
+						this.loadEventPropertiesAsync(4);
+						//set event
+						$('#selectSensorEvent4').val(sEnv.eventname).prop('selected',true);
+						this.changeTypeAndPartitionAsync(4);					
+						//this.updateField('eventTypeValue2', sEnv.eventtypevalue);
+					}else{
+						//kpi based
+						$('#kpiSensor4 option[value="kpi"]').prop('selected',true);
+						this.kpiSensor();
+						
+						//choose the correspondent kpi 
+						
+					}
+										
+					if(sEnv.eventpartition != null)
+						showpartition = true;
 					
 					break;
 				default:
@@ -746,40 +860,33 @@ function Screen1(elInfo) {
 		var kpiFormula = {};
 		var kpiIndex = "";
 		var kpiFormulaIndex = "";
-		var kpiFormulaId = "";
+		var kpiFormulaId = {};
+		var sensorKpi = {};
+		var kpiInformation = {};
 		
 		if (loadedKpi != "") {
 			
-			if(true){
-				$.notify('Not Supported yet');
-				return;
-			}
 			for (var i = 0; i < kpiInfo.length; i++) {
 				if (kpiInfo[i].id == loadedKpi) {
-					kpi = jQuery.extend({}, kpiInfo[i]);
+					kpi = kpiInfo[i]
 					kpiIndex = i;
 					break;
 				}
 			}
+			
 			for (var i = 0; i < kpiFormulas.length; i++) {
 				if (kpiFormulas[i].kpi_id == loadedKpi) {
-					kpiFormulaId = kpiFormulas[i].id;
+					kpiFormula = kpiFormulas[i];
 					kpiFormulaIndex = i;
 					break;
 				}
 			}
-
-			kpiFormula.id = kpiFormulaId;
-			kpiFormula.kpi_id = parseInt(loadedKpi);
-			kpiFormula.term1_kpi_id = null;
-			kpiFormula.term1_sensor_id = null;
-			kpiFormula.operator_1 = null;
-			kpiFormula.term2_kpi_id = null;
-			kpiFormula.term2_sensor_id = null;
-			kpiFormula.operator_2 = null;
-			kpiFormula.term3_kpi_id = null;
-			kpiFormula.term3_sensor_id = null;
-			kpiFormula.criteria = null;
+			
+			//kpiFormula.term1_kpi_id = null;
+			//kpiFormula.term1_sensor_id = null;
+			//kpiFormula.operator_1 = null;
+			//kpiFormula.term2_kpi_id = null;
+			//kpiFormula.term2_sensor_id = null;
 
 			kpi.name = $('#name').val();
 			kpi.text = $('#name').val() + delEditBtn;
@@ -788,14 +895,309 @@ function Screen1(elInfo) {
 			kpi.sampling_rate = parseInt($('#samplingRate').val());
 			kpi.sampling_interval = $('#samplingInterval').val();
 
-			kpi.number_support = $('#numberSupport').val();
-			kpi.number_support_format = $('#numberSupportFormat').val();
-
-			var context = $('#contextualInformation :input');
-			for (var i = 0; i < context.length; i++) {
-				kpi[context[i].value] = context[i].checked;
+			var chk = $('#contextualInformation input');
+			kpi.context_product = chk[0].checked;
+			kpi.context_machine = chk[1].checked;
+			kpi.context_shift = chk[2].checked;
+			kpi.context_mould = chk[3].checked;
+			
+			if(kpi.calculation_type != "aggregate"){
+				kpi.aggregation = 1;
+				kpiInformation.aggregationName = "NONE";
 			}
-			kpiFormula = this.getKpiFormula(kpi, kpiFormula);
+			else{
+				if($('#selectAggType').val()==null){
+					$.notify('Please choose the aggregation type', 'info');
+					return;
+				}else{
+					kpi.aggregation = $('#selectAggType').find(":selected").attr("id");
+					kpiInformation.aggregationName = $('#selectAggType').find(":selected").text();		
+				}
+			}
+			
+			kpi.number_support = $('#numberSupport').val();
+
+			kpi.company_context = $('#companyContext').val();
+			
+			var senEnvIds2Delup = [];
+			
+			switch(kpi.calculation_type){
+			case "simple":
+				
+				kpiFormula.term1_kpi_id = null;
+				kpiFormula.operator_1 = null;
+				kpiFormula.term2_kpi_id = null;
+				
+				if(kpiFormula.term2_sensor_id != null)
+					senEnvIds2Delup.push(kpiFormula.term2_sensor_id);
+				kpiFormula.term2_sensor_id = null;
+				
+				sensorIDvalue = $('#selectSensor1').find(":selected").attr("value");
+				
+				if(kpiFormula.term1_sensor_id != sensorIDvalue){	
+
+					if(kpiFormula.term1_sensor_id != null)	
+						senEnvIds2Delup.push(kpiFormula.term1_sensor_id);
+
+					sensorKpi.sensorid = $('#selectSensor1').find(":selected").attr("value");
+					sensorKpi.sensorname = $('#selectSensor1').find(":selected").text();
+					sensorKpi.eventname = $('#selectSensorEvent1').find(":selected").text();
+					sensorKpi.eventtype = $('#selectSensorEvent1').find(":selected").attr("type");
+					sensorKpi.eventtypevalue = $('#eventTypeValue1').val();
+					sensorKpi.eventpartition = $('#selectSensorEvent1').find(":selected").attr("partition");
+					if(sensorKpi.eventpartition == "true")
+						sensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
+					else
+						sensorKpi.partitionid = "none";
+					sensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
+					sensorKpi.sampling_interval = $('#samplingInterval').val();
+					
+					
+					$.ajax({
+						url : restAddress
+								+ 'proasense_hella/sensorevent',
+						type : 'POST',
+						async: false ,
+						data : '{"type":"INSERT","data":['
+								+ JSON
+										.stringify(sensorKpi)
+								+ ']}',
+						success : function(result) {
+							$('html').unblock();
+							if (result.succeeded) {
+								
+								kpiFormula.term1_sensor_id = result.insertId[0];
+								sensorKpi.id = result.insertId[0];
+								//add to local	
+								sensorEvents.push(sensorKpi);
+							}
+							else{
+								$.notify('Error adding sensor 1');
+								return
+							}
+						}
+					});
+				}
+				break;
+			case "aggregate":
+				
+				kpiFormula.operator_1 = null;
+				kpiFormula.term2_kpi_id = null;
+				
+				if(kpiFormula.term2_sensor_id != null)
+					senEnvIds2Delup.push(kpiFormula.term2_sensor_id);
+				kpiFormula.term2_sensor_id = null;
+
+				if($('#kpiSensor1').val() == 'sensor'){
+					
+					kpiFormula.term1_kpi_id = null;
+					
+					sensorIDvalue = $('#selectSensor2').find(":selected").attr("value");
+					
+					if(kpiFormula.term1_sensor_id != sensorIDvalue){	
+
+						if(kpiFormula.term1_sensor_id != null)		
+							senEnvIds2Delup.push(kpiFormula.term1_sensor_id);
+
+						sensorKpi.sensorid = $('#selectSensor2').find(":selected").attr("value");
+						sensorKpi.sensorname = $('#selectSensor2').find(":selected").text();
+						sensorKpi.eventname = $('#selectSensorEvent2').find(":selected").text();
+						sensorKpi.eventtype = $('#selectSensorEvent2').find(":selected").attr("type");
+						sensorKpi.eventtypevalue = $('#eventTypeValue2').val();
+						sensorKpi.eventpartition = $('#selectSensorEvent2').find(":selected").attr("partition");
+						if(sensorKpi.eventpartition == "true")
+							sensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
+						else
+							sensorKpi.partitionid = "none";
+						sensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
+						sensorKpi.sampling_interval = $('#samplingInterval').val();
+						
+						
+						$.ajax({
+							url : restAddress
+									+ 'proasense_hella/sensorevent',
+							type : 'POST',
+							async: false ,
+							data : '{"type":"INSERT","data":['
+									+ JSON
+											.stringify(sensorKpi)
+									+ ']}',
+							success : function(result) {
+								$('html').unblock();
+								if (result.succeeded) {
+									
+									kpiFormula.term1_sensor_id = result.insertId[0];
+									sensorKpi.id = result.insertId[0];
+									//add to local	
+									sensorEvents.push(sensorKpi);
+								}
+								else{
+									$.notify('Error adding sensor 1');
+									return
+								}
+							}
+						});
+					}
+					
+				}
+				else{
+					
+					//case of kpi usage
+					alert("Not supported yet with kpis");
+					return;
+					
+					if(kpiFormula.term1_sensor_id != null)
+						senEnvIds2Delup.push(kpiFormula.term1_sensor_id);
+					
+					
+				}
+				
+				
+				break;
+			case "composed":
+	
+				kpiFormula.operator_1 = $('#op1').val();
+				kpiInformation.operator1 = kpiFormula.operator_1;
+
+				if($('#kpiSensor2').val() == 'sensor'){
+					
+					kpiFormula.term1_kpi_id = null;
+					
+					sensorIDvalue = $('#selectSensor3').find(":selected").attr("value");
+					
+					if(kpiFormula.term1_sensor_id != sensorIDvalue){	
+										
+
+						if(kpiFormula.term1_sensor_id != null)
+							senEnvIds2Delup.push(kpiFormula.term1_sensor_id);
+
+						sensorKpi.sensorid = $('#selectSensor3').find(":selected").attr("value");
+						sensorKpi.sensorname = $('#selectSensor3').find(":selected").text();
+						sensorKpi.eventname = $('#selectSensorEvent3').find(":selected").text();
+						sensorKpi.eventtype = $('#selectSensorEvent3').find(":selected").attr("type");
+						sensorKpi.eventtypevalue = $('#eventTypeValue3').val();
+						sensorKpi.eventpartition = $('#selectSensorEvent3').find(":selected").attr("partition");
+						if(sensorKpi.eventpartition == "true")
+							sensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
+						else
+							sensorKpi.partitionid = "none";
+						sensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
+						sensorKpi.sampling_interval = $('#samplingInterval').val();
+						
+						
+						$.ajax({
+							url : restAddress
+									+ 'proasense_hella/sensorevent',
+							type : 'POST',
+							async: false ,
+							data : '{"type":"INSERT","data":['
+									+ JSON
+											.stringify(sensorKpi)
+									+ ']}',
+							success : function(result) {
+								$('html').unblock();
+								if (result.succeeded) {
+									
+									kpiFormula.term1_sensor_id = result.insertId[0];
+									sensorKpi.id = result.insertId[0];
+									//add to local	
+									sensorEvents.push(sensorKpi);
+								}
+								else{
+									$.notify('Error adding sensor 1');
+									return
+								}
+							}
+						});
+					}
+					
+					
+					
+				}
+				else{
+					
+					//case of kpi usage
+					alert("Not supported yet with kpis");
+					return;
+					
+					if(kpiFormula.term1_sensor_id != null)
+						senEnvIds2Delup.push(kpiFormula.term1_sensor_id);
+	
+				}
+				
+				
+				if($('#kpiSensor3').val() == 'sensor'){
+					
+					kpiFormula.term2_kpi_id = null;
+					
+					sensorIDvalue = $('#selectSensor4').find(":selected").attr("value");
+					
+					if(kpiFormula.term2_sensor_id != sensorIDvalue){	
+										
+						if(kpiFormula.term2_sensor_id != null)
+							senEnvIds2Delup.push(kpiFormula.term2_sensor_id);
+
+						delete sensorKpi.id;
+						
+						sensorKpi.sensorid = $('#selectSensor4').find(":selected").attr("value");
+						sensorKpi.sensorname = $('#selectSensor4').find(":selected").text();
+						sensorKpi.eventname = $('#selectSensorEvent4').find(":selected").text();
+						sensorKpi.eventtype = $('#selectSensorEvent4').find(":selected").attr("type");
+						sensorKpi.eventtypevalue = $('#eventTypeValue4').val();
+						sensorKpi.eventpartition = $('#selectSensorEvent4').find(":selected").attr("partition");
+						if(sensorKpi.eventpartition == "true")
+							sensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
+						else
+							sensorKpi.partitionid = "none";
+						sensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
+						sensorKpi.sampling_interval = $('#samplingInterval').val();
+						
+						
+						$.ajax({
+							url : restAddress
+									+ 'proasense_hella/sensorevent',
+							type : 'POST',
+							async: false ,
+							data : '{"type":"INSERT","data":['
+									+ JSON
+											.stringify(sensorKpi)
+									+ ']}',
+							success : function(result) {
+								$('html').unblock();
+								if (result.succeeded) {
+									
+									kpiFormula.term2_sensor_id = result.insertId[0];
+									sensorKpi.id = result.insertId[0];
+									//add to local	
+									sensorEvents.push(sensorKpi);
+								}
+								else{
+									$.notify('Error adding sensor 2');
+									return
+								}
+							}
+						});
+					}
+					
+				}
+				else{
+					
+					//case of kpi usage
+					alert("Not supported yet with kpis");
+					return;
+					
+					if(kpiFormula.term2_sensor_id != null)
+						senEnvIds2Delup.push(kpiFormula.term2_sensor_id);
+	
+				}
+				break;
+				
+				default:
+					alert("Enter in default update!!");
+					break;
+			
+			}
+			
 			$('html').block({
 				'message' : null
 			});
@@ -820,6 +1222,21 @@ function Screen1(elInfo) {
 								$('html').unblock();
 
 								if (result.succeeded) {
+									
+									//merge kpi and sensor information
+									$.extend(kpiInformation, sensorKpi , kpi);
+																											
+									//inform the storage of the new kpi
+									$.ajax({
+										url : restAddress
+												+ 'proasense_hella/update',
+										type : 'POST',
+										data : '{"type":"INFORM","data":['
+												+ JSON
+														.stringify(kpiInformation)
+												+ ']}',
+									});
+									
 									$.notify('KPI updated', 'success');
 									kpiInfo[kpiIndex] = kpi;
 									kpiFormulas[kpiFormulaIndex] = kpiFormula;
@@ -835,15 +1252,45 @@ function Screen1(elInfo) {
 						$('html').unblock();
 						$.notify('Formula update failed');
 					}
-				}
-			});
+					
+					
+					for(var i = 0; i < senEnvIds2Delup.length; i++){
+						
+						for(var idx = 0 ; idx < sensorEvents.length ; idx++)
+							if(sensorEvents[idx].id == senEnvIds2Delup[i]){
+								sensorEvents.splice(idx,1);
+								alert("Eleminou o id: " + senEnvIds2Delup[i]);
+								break;
+							}
+						
+						$.ajax({
+							url: restAddress + 'proasense_hella/sensorevent',
+							type: 'POST',
+							data: '{"type":"DELETE","data":[{"id":' + senEnvIds2Delup[i] + '}]}',
+							async: false,
+							success: function(result) {
 
+								if (result.succeeded) {
+									alert("apagou o id: "+senEnvIds2Delup[i]);
+								}else{
+									$('html').unblock();
+									$.notify('Error deleting sensor events');
+									return;
+								}
+							}
+								
+						});
+					}		
+				}
+			});			
 		} else {
 			if (($('#calculationType').val() != null)
 					&& ($('#numberSupport').val() != null)
 					&& ($('#samplingInterval').val() != null)
+					&& ($('#samplingRate').val() != null)
 					&& ($('#name').val() != "")
 					&& ($('#description').val() != "")) {
+				
 				var newKpi = {};
 				var newKpiFormula = {};
 				var newsensorKpi = {};
@@ -887,7 +1334,9 @@ function Screen1(elInfo) {
 				}
 
 				newKpi.number_support = $('#numberSupport').val().toUpperCase();
-				newKpi.number_support_format = $('#numberSupportFormat').val().toUpperCase();
+				//integrating context in kpi
+				newKpi.company_context = $('#companyContext').val();
+				//newKpi.number_support_format = $('#numberSupportFormat').val().toUpperCase();
 
 				//get the formula
 				//newKpiFormula = this.getKpiFormula(newKpi, newKpiFormula);
@@ -916,6 +1365,7 @@ function Screen1(elInfo) {
 										newsensorKpi.sensorname = $('#selectSensor1').find(":selected").text();
 										newsensorKpi.eventname = $('#selectSensorEvent1').find(":selected").text();
 										newsensorKpi.eventtype = $('#selectSensorEvent1').find(":selected").attr("type");
+										newsensorKpi.eventtypevalue = $('#eventTypeValue1').val();
 										newsensorKpi.eventpartition = $('#selectSensorEvent1').find(":selected").attr("partition");
 										if(newsensorKpi.eventpartition == "true")
 											newsensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
@@ -1031,6 +1481,7 @@ function Screen1(elInfo) {
 											newsensorKpi.sensorname = $('#selectSensor2').find(":selected").text();
 											newsensorKpi.eventname = $('#selectSensorEvent2').find(":selected").text();
 											newsensorKpi.eventtype = $('#selectSensorEvent2').find(":selected").attr("type");
+											newsensorKpi.eventtypevalue = $('#eventTypeValue2').val();
 											newsensorKpi.eventpartition = $('#selectSensorEvent2').find(":selected").attr("partition");
 											if(newsensorKpi.eventpartition == "true")
 												newsensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
@@ -1077,7 +1528,7 @@ function Screen1(elInfo) {
 																	if (result.succeeded) {
 																		
 																		//merge kpi and sensor information
-																		$.extend(newkpiInformation, newKpi, newsensorKpi);
+																		$.extend(newkpiInformation, newsensorKpi , newKpi);
 																																				
 																		//inform the storage of the new kpi
 																		$.ajax({
@@ -1146,14 +1597,15 @@ function Screen1(elInfo) {
 										break;
 									case "composed":
 										
+										/*
 										if(true){
 											$.notify('Not Supported yet');
 											return;
-										}
+										}*/
 										
 										sensor1 = $('#kpiSensor2').val() == 'sensor';
 										sensor2 = $('#kpiSensor3').val() == 'sensor';
-										sensor3 = $('#kpiSensor4').val() == 'sensor';
+										//sensor3 = $('#kpiSensor4').val() == 'sensor';
 
 										newsensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
 										newsensorKpi.sampling_interval = $('#samplingInterval').val();
@@ -1169,6 +1621,7 @@ function Screen1(elInfo) {
 											newsensorKpi.sensorname = $('#selectSensor3').find(":selected").text();
 											newsensorKpi.eventname = $('#selectSensorEvent3').find(":selected").text();
 											newsensorKpi.eventtype = $('#selectSensorEvent3').find(":selected").attr("type");
+											newsensorKpi.eventtypevalue = $('#eventTypeValue3').val();
 											newsensorKpi.eventpartition = $('#selectSensorEvent3').find(":selected").attr("partition");
 											if(newsensorKpi.eventpartition == "true")
 												newsensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
@@ -1181,10 +1634,10 @@ function Screen1(elInfo) {
 											newkpiInformation.eventtype1 = newsensorKpi.eventtype;
 											newkpiInformation.eventpartition1 = newsensorKpi.eventpartition;
 											newkpiInformation.partitionid1 = newsensorKpi.partitionid;
-											
+																						
 										}
 										else{
-											alert("NOT SUPPORTED YET");
+											alert("Not supported yet, the usage of kpis");
 											break;
 										}
 										
@@ -1200,8 +1653,6 @@ function Screen1(elInfo) {
 											success : function(result) {
 												$('html').unblock();
 												if (result.succeeded) {
-													
-													
 													
 													if(sensor1){
 														newKpiFormula.term1_sensor_id = result.insertId[0];
@@ -1219,11 +1670,15 @@ function Screen1(elInfo) {
 										});
 										
 										if(sensor2){
+											
+											delete newsensorKpi.id;
+											
 											//info to integrate with dominik model
 											newsensorKpi.sensorid = $('#selectSensor4').find(":selected").attr("value");
 											newsensorKpi.sensorname = $('#selectSensor4').find(":selected").text();
 											newsensorKpi.eventname = $('#selectSensorEvent4').find(":selected").text();
 											newsensorKpi.eventtype = $('#selectSensorEvent4').find(":selected").attr("type");
+											newsensorKpi.eventtypevalue = $('#eventTypeValue4').val();
 											newsensorKpi.eventpartition = $('#selectSensorEvent4').find(":selected").attr("partition");
 											if(newsensorKpi.eventpartition == "true")
 												newsensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
@@ -1236,9 +1691,10 @@ function Screen1(elInfo) {
 											newkpiInformation.eventtype2 = newsensorKpi.eventtype;
 											newkpiInformation.eventpartition2 = newsensorKpi.eventpartition;
 											newkpiInformation.partitionid2 = newsensorKpi.partitionid;
+																						
 										}
 										else{
-											alert("NOT SUPPORTED YET");
+											alert("Not supported yet, the usage of kpis");
 											break;
 										}
 										
@@ -1268,62 +1724,6 @@ function Screen1(elInfo) {
 												}
 											}
 										});
-																				
-										if ($('#op2').val() != "none" && $('#op2').val() != null ) {
-											
-											newKpiFormula.operator_2 = $('#op2').val();
-											newkpiInformation.operator2 = newKpiFormula.operator_2;
-											
-											if(sensor3){
-												//info to integrate with dominik model
-												newsensorKpi.sensorid = $('#selectSensor5').find(":selected").attr("value");
-												newsensorKpi.sensorname = $('#selectSensor5').find(":selected").text();
-												newsensorKpi.eventname = $('#selectSensorEvent5').find(":selected").text();
-												newsensorKpi.eventtype = $('#selectSensorEvent5').find(":selected").attr("type");
-												newsensorKpi.eventpartition = $('#selectSensorEvent5').find(":selected").attr("partition");
-												if(newsensorKpi.eventpartition == "true")
-													newsensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
-												else
-													newsensorKpi.partitionid = "none";
-												
-												newkpiInformation.sensorid3 = newsensorKpi.sensorid;
-												newkpiInformation.sensorname3 = newsensorKpi.sensorname;
-												newkpiInformation.eventname3 = newsensorKpi.eventname;
-												newkpiInformation.eventtype3 = newsensorKpi.eventtype;
-												newkpiInformation.eventpartition3 = newsensorKpi.eventpartition;
-												newkpiInformation.partitionid3 = newsensorKpi.partitionid;
-											}
-											else {			//kpi made with another kpi
-												alert("NOT SUPPORTED YET 3");
-											}
-											
-											$.ajax({
-												url : restAddress
-														+ 'proasense_hella/sensorevent',
-												type : 'POST',
-												async: false ,
-												data : '{"type":"INSERT","data":['
-														+ JSON
-																.stringify(newsensorKpi)
-														+ ']}',
-												success : function(result) {
-													$('html').unblock();
-													if (result.succeeded) {
-														if(sensor3){
-															newKpiFormula.term3_sensor_id = result.insertId[0];
-															newsensorKpi.id = result.insertId[0];
-															//add to local	
-															sensorEvents.push(newsensorKpi);
-														}else
-															newKpiFormula.term3_kpi_id = result.insertId[0];
-													}
-													else{
-														sensorRegSuccessfull = sensorRegSuccessfull && false;
-														$.notify('Error adding sensor 3');
-													}
-												}
-											});
-										}
 										
 										if(sensorRegSuccessfull){
 											$.ajax({
@@ -1339,7 +1739,7 @@ function Screen1(elInfo) {
 													if (result.succeeded) {
 														
 														//merge kpi and sensor information
-														$.extend(newkpiInformation, newKpi, newkpiInformation);
+														$.extend(newkpiInformation, newkpiInformation , newKpi);
 														
 														console.log(newkpiInformation);
 														
@@ -1397,11 +1797,6 @@ function Screen1(elInfo) {
 															type: 'POST',
 															data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term2_sensor_id + '}]}',
 															});
-														$.ajax({
-															url: restAddress + 'proasense_hella/sensorevent',
-															type: 'POST',
-															data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term3_sensor_id + '}]}',
-															});
 														$.notify('Error adding formula');
 													}
 												}
@@ -1414,21 +1809,18 @@ function Screen1(elInfo) {
 												type: 'POST',
 												data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
 												});
-											$.ajax({
-												url: restAddress + 'proasense_hella/sensorevent',
-												type: 'POST',
-												data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
-												});
-											$.ajax({
-												url: restAddress + 'proasense_hella/sensorevent',
-												type: 'POST',
-												data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term2_sensor_id + '}]}',
-												});
-											$.ajax({
-												url: restAddress + 'proasense_hella/sensorevent',
-												type: 'POST',
-												data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term3_sensor_id + '}]}',
-												});
+											if(newKpiFormula.term1_sensor_id !=null)
+												$.ajax({
+													url: restAddress + 'proasense_hella/sensorevent',
+													type: 'POST',
+													data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
+													});
+											if(newKpiFormula.term2_sensor_id !=null)
+												$.ajax({
+													url: restAddress + 'proasense_hella/sensorevent',
+													type: 'POST',
+													data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term2_sensor_id + '}]}',
+													});
 										}
 										break;
 									default:
@@ -1443,12 +1835,7 @@ function Screen1(elInfo) {
 						});
 
 			} else {
-				if (validateInputResult.message != "") {
-					$.notify(validateInputResult.message, 'info');
-					$(validateInputResult.element).select();
-				}
-				else
-					$.notify('Please fill all the boxes', 'info');
+				$.notify('Please fill all the boxes', 'info');
 			}
 		}
 	}

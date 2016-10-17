@@ -3,7 +3,6 @@ package dataServer;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
@@ -76,7 +75,7 @@ public class Main extends HttpServlet {
 				writeLogMsg("<request>" + queryString + "</request>");
 			}
 			if (dbName.equals("func")) {
-				String x = tableName.substring(0, 12);
+				//String x = tableName.substring(0, 12);
 				if (tableName.contains("getGraphData")) {
 					response.getWriter().println(getGraphData(queryParams));
 				} else if (tableName.contains("getHeatMapData")) {
@@ -714,7 +713,7 @@ private String getParamValueOf(String paramString){
 	public void updateData(HttpServletResponse response, String dbName, String tableName, Object data,
 			String remoteAddress) {
 		
-		/*try {
+		try {
 			String str = "";
 			String query = "";
 			Integer upRows = null;
@@ -732,11 +731,11 @@ private String getParamValueOf(String paramString){
 					continue;
 				}
 				Object val = obj.get(propertiesVect[i]);
-				query = query + "\"" + propertiesVect[i] + "\"=" + (val instanceof String ? "'" + val + "'" : val)
+				query = query + "\"" + propertiesVect[i].toString().toUpperCase() + "\"=" + (val instanceof String ? "'" + val + "'" : val)
 						+ ",";
 
 			}
-			query = query.substring(0, query.length() - 1) + " WHERE \"" + idEl + "\"=" + id;
+			query = query.substring(0, query.length() - 1) + " WHERE \"" + idEl.toString().toUpperCase() + "\"=" + id;
 			Connection c = DriverManager.getConnection(dbConfig.jdbcURL + dbName, dbConfig.userName, dbConfig.password);
 			Statement s = c.createStatement();
 			writeLogMsg("SQL Query: " + query);
@@ -755,7 +754,7 @@ private String getParamValueOf(String paramString){
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-		}*/
+		}
 	}
 
 	//delete data from de DB
@@ -781,8 +780,8 @@ private String getParamValueOf(String paramString){
 				}
 
 			}
-			writeLogMsg("SQL Query: " + query);
-			delRows = s.executeUpdate(query);
+			writeLogMsg("SQL Query: " + query);			
+			delRows = s.executeUpdate(query);			
 			response.getWriter().println("{\"succeeded\":" + (delRows == 0 ? "false" : "true") + ",\"result\":\""
 					+ delRows + " records deleted\"}");
 			writeLogMsg("Response at: " + remoteAddress);
@@ -799,14 +798,14 @@ private String getParamValueOf(String paramString){
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void informData(HttpServletResponse response, String dbName, String informType,Object data,
 			String remoteAddress) {
 		try {
 			
 			JSONArray parsedData = (JSONArray) data;
 			JSONObject obj = (JSONObject) parsedData.get(0);
-
+			String kpiJSON;
+			
 			switch(informType){
 			case "delete":
 				if(testing){
@@ -820,149 +819,29 @@ private String getParamValueOf(String paramString){
 				break;
 			case "insert":
 				
-				// parsing the information to integrate with storage
-				JSONObject storageModelObject = new JSONObject();
-				JSONObject operation = new JSONObject();
-				JSONObject properties = new JSONObject();
-				JSONObject window = new JSONObject();
-				
-				System.out.println("\n\n\n\ntype -> "+obj.get("calculation_type").toString());
-				
-				switch(obj.get("calculation_type").toString()){
-					case "simple":
-											
-						window.put("windowType", "TIME");
-						window.put("value", obj.get("sampling_rate"));
-						window.put("timeUnit", obj.get("sampling_interval"));
-						
-						properties.put("unaryOperationType", obj.get("aggregationName"));
-						properties.put("sensorId", obj.get("sensorid"));
-						properties.put("eventPropertyName", obj.get("eventname"));
-						properties.put("propertyRestriction", obj.get("partitionid"));
-						properties.put("propertyType", obj.get("eventtype"));
-						properties.put("partition", obj.get("eventpartition"));
-						properties.put("operationType",  obj.get("number_support"));
-						properties.put("window", window);
-						
-						operation.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
-						operation.put("properties", properties);
-						
-						storageModelObject.put("kpiId", obj.get("id"));
-						storageModelObject.put("kpiName", obj.get("name"));
-						storageModelObject.put("Context", "hella");
-						storageModelObject.put("kpiDescription", obj.get("description"));
-						storageModelObject.put("kpiOperation", "ADD");
-						storageModelObject.put("operation", operation);
-											
-						break;
-					case "aggregate":
-						
-						window.put("windowType", "TIME");
-						window.put("value", obj.get("sampling_rate"));
-						window.put("timeUnit", obj.get("sampling_interval"));
-						
-						properties.put("unaryOperationType", obj.get("aggregationName"));
-						properties.put("sensorId", obj.get("sensorid"));
-						properties.put("eventPropertyName", obj.get("eventname"));
-						properties.put("propertyRestriction", obj.get("partitionid"));
-						properties.put("propertyType", obj.get("eventtype"));
-						properties.put("partition", obj.get("eventpartition"));
-						properties.put("operationType",  obj.get("number_support"));
-						properties.put("window", window);
-						
-						operation.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
-						operation.put("properties", properties);
-						
-						storageModelObject.put("kpiId", obj.get("id"));
-						storageModelObject.put("kpiName", obj.get("name"));
-						storageModelObject.put("Context", "hella");
-						storageModelObject.put("kpiDescription", obj.get("description"));
-						storageModelObject.put("kpiOperation", "ADD");
-						storageModelObject.put("operation", operation);
-						
-						break;
-					case "composed":
-												
-						JSONObject leftOp = new JSONObject();
-						JSONObject leftOpP = new JSONObject();
-						JSONObject rightOp = new JSONObject();
-						JSONObject rightOpP = new JSONObject();
-						
-						window.put("windowType", "TIME");
-						window.put("value", obj.get("sampling_rate"));
-						window.put("timeUnit", obj.get("sampling_interval"));
-						
-						//operation with 2 operators
-						if(obj.get("operator2") != null && obj.get("operator2") != "none" ){
-						
-						}
-						else{
-							leftOpP.put("unaryOperationType", obj.get("aggregationName"));
-							leftOpP.put("sensorId", obj.get("sensorid1"));
-							leftOpP.put("eventPropertyName", obj.get("eventname1"));
-							leftOpP.put("propertyRestriction", obj.get("partitionid1"));
-							leftOpP.put("propertyType", obj.get("eventtype1"));
-							leftOpP.put("partition", obj.get("eventpartition1"));
-							leftOpP.put("window", window);
-							
-							leftOp.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
-							leftOp.put("properties", leftOpP);
-							
-							rightOpP.put("unaryOperationType", obj.get("aggregationName"));
-							rightOpP.put("sensorId", obj.get("sensorid2"));
-							rightOpP.put("eventPropertyName", obj.get("eventname2"));
-							rightOpP.put("propertyRestriction", obj.get("partitionid2"));
-							rightOpP.put("propertyType", obj.get("eventtype2"));
-							rightOpP.put("partition", obj.get("eventpartition2"));
-							rightOpP.put("window", window);
-							
-							rightOp.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
-							rightOp.put("properties", rightOpP);
-							
-							properties.put("left", leftOp);
-							properties.put("right", rightOp);
-							properties.put("arithmeticOperationType", obj.get("operator1"));
-							properties.put("operationType", obj.get("number_support"));
-							
-							operation.put("type", "de.fzi.cep.sepa.kpi.BinaryOperation");
-							operation.put("properties", properties);
-							
-							storageModelObject.put("kpiId", obj.get("id"));
-							storageModelObject.put("kpiName", obj.get("name"));
-							storageModelObject.put("Context", "hella");
-							storageModelObject.put("kpiDescription", obj.get("description"));
-							storageModelObject.put("kpiOperation", "ADD");
-							storageModelObject.put("operation", operation);
-						}
-						
-						break;
-					default:
-						
-						
-						break;
-				}
+				kpiJSON = convertKPIObjectToJSON(obj);
 				
 				if(testing){
 					System.out.println("\n\n################################################################################\n");
 					System.out.println("Envia inform do tipo add com :");
-					System.out.println(storageModelObject.toString());
-					System.out.println(storageModelObject.toJSONString());
+					System.out.println(kpiJSON);
 					System.out.println("\n################################################################################\n\n");
 				}else
-					SRCM.insertKPIStorage(storageModelObject.toString());
+					SRCM.insertKPIStorage(kpiJSON);
 				
 				break;
 			case "update":
 					
-				//###########################################################################################################################
-				//###########################################################################################################################
-				//###########################################################################################################################
-				//###########################################################################################################################
-				//###########################################################################################################################
-				//###########################################################################################################################
-				//###########################################################################################################################
-				//###########################################################################################################################
-				//###########################################################################################################################
+				kpiJSON = convertKPIObjectToJSON(obj);
+				
+				if(testing){
+					System.out.println("\n\n################################################################################\n");
+					System.out.println("Envia inform do tipo update com :");
+					System.out.println(kpiJSON);
+					System.out.println("\n################################################################################\n\n");
+				}else
+					//SRCM.insertKPIStorage(kpiJSON);
+					return;
 				
 				break;
 			default:
@@ -982,6 +861,132 @@ private String getParamValueOf(String paramString){
 
 	}
 
+	@SuppressWarnings("unchecked")
+	private String convertKPIObjectToJSON(JSONObject obj){
+		
+		// parsing the information to integrate with storage
+		JSONObject storageModelObject = new JSONObject();
+		JSONObject operation = new JSONObject();
+		JSONObject properties = new JSONObject();
+		JSONObject window = new JSONObject();
+				
+		switch(obj.get("calculation_type").toString()){
+			case "simple":
+									
+				window.put("windowType", "TIME");
+				window.put("value", obj.get("sampling_rate"));
+				window.put("timeUnit", obj.get("sampling_interval"));
+				
+				properties.put("unaryOperationType", obj.get("aggregationName"));
+				properties.put("sensorId", obj.get("sensorid"));
+				properties.put("eventPropertyName", obj.get("eventname"));
+				properties.put("propertyRestriction", obj.get("partitionid"));
+				properties.put("propertyType", obj.get("eventtype"));
+				properties.put("partition", obj.get("eventpartition"));
+				properties.put("operationType",  obj.get("number_support"));
+				properties.put("window", window);
+				
+				operation.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
+				operation.put("properties", properties);
+				
+				storageModelObject.put("kpiId", obj.get("id"));
+				storageModelObject.put("kpiName", obj.get("name"));
+				storageModelObject.put("Context", obj.get("company_context"));
+				storageModelObject.put("kpiDescription", obj.get("description"));
+				storageModelObject.put("kpiOperation", "ADD");
+				storageModelObject.put("operation", operation);
+									
+				break;
+			case "aggregate":
+				
+				window.put("windowType", "TIME");
+				window.put("value", obj.get("sampling_rate"));
+				window.put("timeUnit", obj.get("sampling_interval"));
+				
+				properties.put("unaryOperationType", obj.get("aggregationName"));
+				properties.put("sensorId", obj.get("sensorid"));
+				properties.put("eventPropertyName", obj.get("eventname"));
+				properties.put("propertyRestriction", obj.get("partitionid"));
+				properties.put("propertyType", obj.get("eventtype"));
+				properties.put("partition", obj.get("eventpartition"));
+				properties.put("operationType",  obj.get("number_support"));
+				properties.put("window", window);
+				
+				operation.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
+				operation.put("properties", properties);
+				
+				storageModelObject.put("kpiId", obj.get("id"));
+				storageModelObject.put("kpiName", obj.get("name"));
+				storageModelObject.put("Context", obj.get("company_context"));
+				storageModelObject.put("kpiDescription", obj.get("description"));
+				storageModelObject.put("kpiOperation", "ADD");
+				storageModelObject.put("operation", operation);
+				
+				break;
+			case "composed":
+										
+				JSONObject leftOp = new JSONObject();
+				JSONObject leftOpP = new JSONObject();
+				JSONObject rightOp = new JSONObject();
+				JSONObject rightOpP = new JSONObject();
+				
+				window.put("windowType", "TIME");
+				window.put("value", obj.get("sampling_rate"));
+				window.put("timeUnit", obj.get("sampling_interval"));
+				
+				//operation with 2 operators
+				if(obj.get("operator2") != null && obj.get("operator2") != "none" ){
+				
+				}
+				else{
+					leftOpP.put("unaryOperationType", obj.get("aggregationName"));
+					leftOpP.put("sensorId", obj.get("sensorid1"));
+					leftOpP.put("eventPropertyName", obj.get("eventname1"));
+					leftOpP.put("propertyRestriction", obj.get("partitionid1"));
+					leftOpP.put("propertyType", obj.get("eventtype1"));
+					leftOpP.put("partition", obj.get("eventpartition1"));
+					leftOpP.put("window", window);
+					
+					leftOp.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
+					leftOp.put("properties", leftOpP);
+					
+					rightOpP.put("unaryOperationType", obj.get("aggregationName"));
+					rightOpP.put("sensorId", obj.get("sensorid2"));
+					rightOpP.put("eventPropertyName", obj.get("eventname2"));
+					rightOpP.put("propertyRestriction", obj.get("partitionid2"));
+					rightOpP.put("propertyType", obj.get("eventtype2"));
+					rightOpP.put("partition", obj.get("eventpartition2"));
+					rightOpP.put("window", window);
+					
+					rightOp.put("type", "de.fzi.cep.sepa.kpi.UnaryOperation");
+					rightOp.put("properties", rightOpP);
+					
+					properties.put("left", leftOp);
+					properties.put("right", rightOp);
+					properties.put("arithmeticOperationType", obj.get("operator1"));
+					properties.put("operationType", obj.get("number_support"));
+					
+					operation.put("type", "de.fzi.cep.sepa.kpi.BinaryOperation");
+					operation.put("properties", properties);
+					
+					storageModelObject.put("kpiId", obj.get("id"));
+					storageModelObject.put("kpiName", obj.get("name"));
+					storageModelObject.put("Context", obj.get("company_context"));
+					storageModelObject.put("kpiDescription", obj.get("description"));
+					storageModelObject.put("kpiOperation", "ADD");
+					storageModelObject.put("operation", operation);
+				}
+				
+				break;
+			default:
+				
+				
+				break;
+		}
+		
+		return (storageModelObject.toJSONString());
+	}
+	
 	
 	public void handle(String target, HttpServletRequest baseRequest, HttpServletResponse response)
 			throws IOException, ServletException {
@@ -1035,7 +1040,6 @@ private String getParamValueOf(String paramString){
 			String dbName = parts[1];
 			String tableName = parts[2];
 			JSONObject tmpObj = null;
-			JSONArray tmpArr = null;
 
 			if (method == "GET") {
 				getData(response, dbName, tableName, idReq, remoteAddress, queryString);
@@ -1133,7 +1137,7 @@ private String getParamValueOf(String paramString){
 	}
 
 	public void init() {
-		ServletContext context = getServletContext();
+		//ServletContext context = getServletContext();
 		
 		if(SystemUtils.IS_OS_UNIX){
 			logPath = File.separator+"home"

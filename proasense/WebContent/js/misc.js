@@ -221,29 +221,34 @@ function removeElement(delId) {
 		if(iFormula.term3_sensor_id != null){
 			senEnvIds2Del.push(iFormula.term3_sensor_id);
 		}
-		//delete sensor events
-		for(var i = 0; i < senEnvIds2Del.length; i++){
-			
-			$.ajax({
-				url: restAddress + 'proasense_hella/sensorevent',
-				type: 'POST',
-				data: '{"type":"DELETE","data":[{"id":' + senEnvIds2Del[i] + '}]}',
-				success: function(result) {
-
-					if (result.succeeded) {
-					
-					}
-				}
-					
-			});
-		}
-				
+		
 		$.ajax({
 			url: restAddress + 'proasense_hella/kpi_formula',
 			type: 'POST',
 			data: '{"type":"DELETE","data":[{"id":' + iFormula.id + '}]}',
 			success: function(result) {
 
+				//delete sensor events
+				for(var i = 0; i < senEnvIds2Del.length; i++){
+					$.ajax({
+						url: restAddress + 'proasense_hella/sensorevent',
+						type: 'POST',
+						data: '{"type":"DELETE","data":[{"id":' + senEnvIds2Del[i] + '}]}',
+						async: false,
+						success: function(result) {
+
+							if (result.succeeded) {
+							
+							}else{
+								$('html').unblock();
+								$.notify('Error deleting sensor events');
+								return;
+							}
+						}
+							
+					});
+				}				
+				
 				if (result.succeeded) {
 					$.ajax({
 						url: restAddress + 'proasense_hella/kpi',
@@ -252,6 +257,7 @@ function removeElement(delId) {
 						success: function(result) {
 							$('html').unblock();
 							if (result.succeeded) {
+								
 								var tree = $('#KPITree').jstree();
 								$.notify('Kpi deleted', 'success');
 								$('#kpiList option[value=' + delId + ']').remove();

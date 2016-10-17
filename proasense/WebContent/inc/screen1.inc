@@ -22,13 +22,13 @@
 				Calculation </option> 
 			</td>
 			<td colspan=5>
-				<select id="calculationType" class="box grey form-control form-control-custom2 select-15" onchange="addKpiNumberSupport()" >
+				<select id="calculationType" class="box grey form-control form-control-custom2 select-15">
 					<option value="" disabled selected hidden>Calculation Type</option>
 					<option value="simple">Simple Measure</option>
 					<option value="aggregate">Aggregate Measure</option>
 					<option value="composed">Composed Measure</option>
 				</select>
-		        <select id="numberSupport" class="box grey form-control form-control-custom2 select-10" onchange="addKpiNumberSupportFormat()" disabled="true">
+		        <select id="numberSupport" class="box grey form-control form-control-custom2 select-10" <!--onchange="addKpiNumberSupportFormat()"--> disabled="true">
 		          	<option value="" disabled selected hidden>Number Type</option>
 		          	<option value="numeric">Numeric</option>
 		          	<option value="boolean">Boolean</option>
@@ -36,6 +36,10 @@
 		          	<option value="date">Date</option>
 		          	<option value="category">Category</option>
 		        </select>
+				<select id="companyContext" class="box grey form-control form-control-custom2 select-10">
+					<option value="hella" selected>Hella Saturnus</option>
+					<option value="mhwirth">MH Wirth</option>
+				</select>
 		        <select id="numberSupportFormat" class="form-control grey form-control-custom2 select-10" style="visibility: hidden">
 		        	<option value="decimal">Decimal</option>
 		    	    <option value="percentage" selected>Percentage</option>
@@ -62,7 +66,9 @@
 					<option value="" disabled selected hidden>Select Event</option>
 				</select>
 				<label id="eventType1" class="grey eventBoxType">Type: </label>
+				<!--
 				<input type="text" id="eventTypeValue1" value="Event value" class="eventTypeValue eventBoxType form-control" onfocus="if(this.value=='Event value')this.value=''" onblur="if(this.value=='')this.value='Event value'">
+				-->
 			</td>
 			<td colspan=2>
 				&nbsp;
@@ -88,12 +94,12 @@
 			<td>
 				<select id="selectAggType" class="box grey form-control form-control-custom2 select-25">
 					<option value="" disabled selected hidden>Select Aggregation Type</option>
-					<option value="minimum">Minimum</option>
+					<!--<option value="minimum">Minimum</option>
 					<option value="maximum">Maximum</option>
 					<option value="average">Average</option>
 					<option value="sum">Sum</option>
 					<option value="standard_deviation">Standard Deviation</option>
-					<option value="count">Count</option>
+					<option value="count">Count</option>-->
 				</select>
 			</td>
 		</tr>
@@ -109,7 +115,9 @@
 					<option value="" disabled selected hidden>Select Event</option>
 				</select>
 				<label id="eventType2" class="grey eventBoxType">Type: </label>
+				<!--
 				<input type="text" id="eventTypeValue2" value="Event value" class="eventTypeValue eventBoxType form-control" onfocus="if(this.value=='Event value')this.value=''" onblur="if(this.value=='')this.value='Event value'">
+				-->
 				<select id="selectKpi1" class="box grey kpiBox form-control form-control-custom2 select-45">
 					<option value="" disabled selected hidden>Select Kpi</option>
 				</select>
@@ -149,7 +157,7 @@
 				</select>
 			</td>
 			<td>
-				<select id="op2" class="box grey form-control form-control-custom2 select-45" style="width:80">
+				<select id="op2" class="box grey form-control form-control-custom2 select-45" style="visibility: hidden">
 					<option value="" disabled selected hidden>Op</option>
 					<option value="SUM">+</option>
 					<option value="DIFF">-</option>
@@ -158,28 +166,30 @@
 				</select>
 			</td>
 			<td>
-				<select id="kpiSensor4" disabled class="box grey kpiSensor thEl form-control form-control-custom2 select-45">
+				<select id="kpiSensor4" disabled class="box grey kpiSensor thEl form-control form-control-custom2 select-45" style="visibility: hidden">
 					<option value="" disabled selected hidden>KPI/Sensor</option>
 					<option value="kpi">KPI</option>
 					<option value="sensor">Sensor</option>
 				</select>
 			</td>
-
+			
 		</tr>
 		<tr class="hiddenRow elRow">
 			<td>
 				&nbsp;
 			</td>
 			<td>
-				<select id="selectSensor3" class="box grey sensorBox sensorChoice form-control sensorChoice select-45">
+				<select id="selectSensor3" class="box grey sensorBox sensorChoice form-control select-45">
 					<option value="" disabled selected hidden>Select Sensor</option>
 				</select>
-				<select id="selectSensorEvent3" class="box grey eventBox eventBoxType form-control sensorChoice select-45">
+				<select id="selectSensorEvent3" class="box grey eventBox eventBoxType form-control select-45">
 					<option value="" partition="false" disabled selected hidden>Select Event</option>
 				</select>
 				<label id="eventType3" class="grey eventBoxType">Type: </label>
+				<!--
 				<input type="text" id="eventTypeValue3" value="Event value" class="eventTypeValue eventBoxType form-control" onfocus="if(this.value=='Event value')this.value=''" onblur="if(this.value=='')this.value='Event value'">
-				<select id="selectKpi2" class="box grey kpiBox kpiChoice select-45">
+				-->
+				<select id="selectKpi2" class="box grey kpiBox kpiChoice form-control select-45">
 					<option value="" disabled selected hidden>Select KPI</option>
 				</select>
 			</td>
@@ -187,14 +197,16 @@
 				&nbsp;
 			</td>
 			<td>
-				<select id="selectSensor4" class="box grey sensorBox sensorChoice form-control sensorChoice select-45">
+				<select id="selectSensor4" class="box grey sensorBox sensorChoice form-control select-45">
 					<option value="" disabled selected hidden>Select Sensor</option>
 				</select>
-				<select id="selectSensorEvent4" class="box grey eventBox eventBoxType form-control sensorChoice select-45">
+				<select id="selectSensorEvent4" class="box grey eventBox eventBoxType form-control select-45">
 					<option value="" partition="false" disabled selected hidden>Select Event</option>
 				</select>
 				<label id="eventType4" class="grey eventBoxType">Type: </label>
+				<!--
 				<input type="text" id="eventTypeValue4" value="Event value" class="eventTypeValue eventBoxType form-control" onfocus="if(this.value=='Event value')this.value=''" onblur="if(this.value=='')this.value='Event value'">
+				-->
 				<select id="selectKpi3" class="box grey kpiBox kpiChoice form-control select-45">
 					<option value="" disabled selected hidden>Select KPI</option>
 				</select>
@@ -206,7 +218,7 @@
 				<select id="selectSensor5" disabled class="box grey sensorBox form-control thEl sensorChoice select-45">
 					<option value="" disabled selected hidden>Select Sensor</option>
 				</select>
-				<select id="selectSensorEvent5" class="box grey eventBox eventBoxType form-control sensorChoice select-45">
+				<select id="selectSensorEvent5" class="box grey eventBox eventBoxType form-control select-45">
 					<option value="" partition="false" disabled selected hidden>Select Event</option>
 				</select>
 				<label id="eventType5" class="grey eventBoxType">Type: </label>
