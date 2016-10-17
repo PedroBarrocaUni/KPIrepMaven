@@ -215,7 +215,49 @@ public class StorageRESTClientManager {
             return null;
         }
     }
+    
  
+    public String updateKPIStorage(String kpiInfo) {
+        
+        // Default HTTP response and common properties for responses
+        HttpResponse response = null;
+        ResponseHandler<String> handler = null;
+        int status = 0;
+        String body = null;
+
+        try {
+            HttpPost
+            query = new HttpPost(storageURL);
+            query.setHeader("Content-type", "application/json");
+            query.setEntity(new StringEntity(kpiInfo));
+            
+            System.out.println("\n\n\n########################################################################################################\n\n\n");
+            System.out.println(kpiInfo);
+            System.out.println("\n\n\n########################################################################################################\n\n\n");
+            System.out.println(query.toString());
+            System.out.println("\n\n\n########################################################################################################\n\n\n");
+            
+            response = client.execute(query);
+
+            // Check status code
+            status = response.getStatusLine().getStatusCode();
+            if (status != 200) {
+                throw new RuntimeException("Failed! HTTP error code: " + status);
+            }
+
+            // Get body
+            handler = new BasicResponseHandler();
+            body = handler.handleResponse(response);
+
+            //result
+            return body;
+            
+        } catch (Exception e) {
+            System.out.println(e.getClass().getName() + ": " + e.getMessage());
+            return null;
+        }
+    }    
+    
     public String deleteKPIStorage(String kpiID) {
       
         // Default HTTP response and common properties for responses

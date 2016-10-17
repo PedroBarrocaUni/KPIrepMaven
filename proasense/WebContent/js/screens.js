@@ -882,12 +882,6 @@ this.changeTypeAndPartitionAsync = function(id) {
 				}
 			}
 			
-			//kpiFormula.term1_kpi_id = null;
-			//kpiFormula.term1_sensor_id = null;
-			//kpiFormula.operator_1 = null;
-			//kpiFormula.term2_kpi_id = null;
-			//kpiFormula.term2_sensor_id = null;
-
 			kpi.name = $('#name').val();
 			kpi.text = $('#name').val() + delEditBtn;
 			kpi.description = $('#description').val();
@@ -1259,7 +1253,6 @@ this.changeTypeAndPartitionAsync = function(id) {
 						for(var idx = 0 ; idx < sensorEvents.length ; idx++)
 							if(sensorEvents[idx].id == senEnvIds2Delup[i]){
 								sensorEvents.splice(idx,1);
-								alert("Eleminou o id: " + senEnvIds2Delup[i]);
 								break;
 							}
 						
@@ -1271,7 +1264,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 							success: function(result) {
 
 								if (result.succeeded) {
-									alert("apagou o id: "+senEnvIds2Delup[i]);
+									
 								}else{
 									$('html').unblock();
 									$.notify('Error deleting sensor events');

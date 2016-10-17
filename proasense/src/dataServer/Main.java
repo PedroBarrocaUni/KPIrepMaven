@@ -819,7 +819,7 @@ private String getParamValueOf(String paramString){
 				break;
 			case "insert":
 				
-				kpiJSON = convertKPIObjectToJSON(obj);
+				kpiJSON = convertKPIObjectToJSON(obj,false);
 				
 				if(testing){
 					System.out.println("\n\n################################################################################\n");
@@ -832,7 +832,7 @@ private String getParamValueOf(String paramString){
 				break;
 			case "update":
 					
-				kpiJSON = convertKPIObjectToJSON(obj);
+				kpiJSON = convertKPIObjectToJSON(obj,true);
 				
 				if(testing){
 					System.out.println("\n\n################################################################################\n");
@@ -840,8 +840,8 @@ private String getParamValueOf(String paramString){
 					System.out.println(kpiJSON);
 					System.out.println("\n################################################################################\n\n");
 				}else
-					//SRCM.insertKPIStorage(kpiJSON);
-					return;
+					SRCM.updateKPIStorage(kpiJSON);
+					
 				
 				break;
 			default:
@@ -862,7 +862,7 @@ private String getParamValueOf(String paramString){
 	}
 
 	@SuppressWarnings("unchecked")
-	private String convertKPIObjectToJSON(JSONObject obj){
+	private String convertKPIObjectToJSON(JSONObject obj, boolean existingKPI){
 		
 		// parsing the information to integrate with storage
 		JSONObject storageModelObject = new JSONObject();
@@ -893,7 +893,11 @@ private String getParamValueOf(String paramString){
 				storageModelObject.put("kpiName", obj.get("name"));
 				storageModelObject.put("Context", obj.get("company_context"));
 				storageModelObject.put("kpiDescription", obj.get("description"));
-				storageModelObject.put("kpiOperation", "ADD");
+				
+				if(existingKPI)
+					storageModelObject.put("kpiOperation", "MODIFY");
+				else
+					storageModelObject.put("kpiOperation", "ADD");
 				storageModelObject.put("operation", operation);
 									
 				break;
@@ -919,7 +923,11 @@ private String getParamValueOf(String paramString){
 				storageModelObject.put("kpiName", obj.get("name"));
 				storageModelObject.put("Context", obj.get("company_context"));
 				storageModelObject.put("kpiDescription", obj.get("description"));
-				storageModelObject.put("kpiOperation", "ADD");
+
+				if(existingKPI)
+					storageModelObject.put("kpiOperation", "MODIFY");
+				else
+					storageModelObject.put("kpiOperation", "ADD");
 				storageModelObject.put("operation", operation);
 				
 				break;
@@ -973,7 +981,11 @@ private String getParamValueOf(String paramString){
 					storageModelObject.put("kpiName", obj.get("name"));
 					storageModelObject.put("Context", obj.get("company_context"));
 					storageModelObject.put("kpiDescription", obj.get("description"));
-					storageModelObject.put("kpiOperation", "ADD");
+
+					if(existingKPI)
+						storageModelObject.put("kpiOperation", "MODIFY");
+					else
+						storageModelObject.put("kpiOperation", "ADD");
 					storageModelObject.put("operation", operation);
 				}
 				
