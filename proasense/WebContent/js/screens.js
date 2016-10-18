@@ -154,16 +154,18 @@ function Screen1(elInfo) {
 			}
 		}
 	}
+	
 	this.loadEventProperties = function(asynchronous) {
 	
 		switch ($('#calculationType').val()) {
 		case 'simple':
 			
 			var sensorId = $('#selectSensor1').val();
+			var context = $('#companyContext').val();
 			// get sensor events
 			$.ajax({
 				url : restAddress + 'proasense_hella/sensorProperties/'
-						+ sensorId,
+						+ sensorId+"_"+context,
 				type : 'GET',
 				async: asynchronous ,
 				success : function(events) {
@@ -395,7 +397,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 		if($('#selectSensorEvent'+id).find(":selected").attr("partition").toUpperCase()== "TRUE")
 			$('.partitionSelection').show();
 	
-	$('#eventType'+id).css('display', 'block')
+	$('#eventType'+id).css('display', 'block');
 	$('#eventType'+id).html('Type: '+sensorEventType);
 	//enable textBox
 	//$('#eventTypeValue'+id).css('display', 'block');
@@ -436,6 +438,8 @@ this.changeTypeAndPartitionAsync = function(id) {
 	// window.alert("screen 1 - OK");
 	this.loadSensors = function() {
 
+		$('.sensorBox').prop( "disabled", false );
+		
 		// load dos sensores
 		var tmpVal = [];
 		for (var i = 0; i < $('.sensorBox').length; i++) {
@@ -508,7 +512,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 			if (kpiFormulas[i].term1_kpi_id == id
 					|| kpiFormulas[i].term2_kpi_id == id
 					|| kpiFormulas[i].term3_kpi_id == id) {
-				return true
+				return true;
 			}
 		}
 		return false;
@@ -528,6 +532,38 @@ this.changeTypeAndPartitionAsync = function(id) {
 
 	// window.alert("screen 1 - OK");
 
+	this.changeContextEnt = function(){
+		
+		var myContext = $('#companyContext').val();
+		$('.sensorBox').prop( "disabled", true );
+		
+		$.ajax({
+			url : restAddress + 'proasense_hella/sensor/'
+					+ myContext,
+			type : 'GET',
+			success : function(sensors) {
+								
+				var tmpVal = [];
+				for (var i = 0; i < $('.sensorBox').length; i++) {
+					tmpVal.push($('.sensorBox').eq(i).val());
+				}
+				
+				$('.sensorBox').find('option:gt(0)').remove();
+				if(sensors!=null){
+					for (var i = 0; i < sensors.length; i++) {
+						$('.sensorBox').append('<option value=' + sensors[i].id + '>' + sensors[i].name + '</option>');
+					}
+					for (var i = 0; i < $('.sensorBox').length; i++) {
+						$('.sensorBox').eq(i).val(tmpVal[i]);
+					}
+				}
+				
+
+				$('.sensorBox').prop( "disabled", false );
+			}
+		});
+	}
+	
 	this.openScreen = function() {
 
 		$('.content').html(this.content);
@@ -543,6 +579,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 		$('#kpiSensor1').change(this.kpiSensor1);
 		$('.sensorBox').change(this.loadEventProperties);
 		$('.eventBox').change(this.changeTypeAndPartition); 
+		$('#companyContext').change(this.changeContextEnt);
 		$('#contextualInformation').change(this.changePartitionIDs);
 		$('#op2').change(this.thirdElement);
 		this.loadSensors();
@@ -1195,6 +1232,32 @@ this.changeTypeAndPartitionAsync = function(id) {
 			$('html').block({
 				'message' : null
 			});
+			
+			//merge kpi and sensor information
+			$.extend(kpiInformation, sensorKpi , kpi);
+			
+			//inform the storage of the new kpi
+			$.ajax({
+				url : restAddress
+						+ 'proasense_hella/update',
+				type : 'POST',
+				async : false,
+				data : '{"type":"INFORM","data":['
+						+ JSON
+								.stringify(kpiInformation)
+						+ ']}',
+				success : function(result){
+					if(result.suceeded){
+						
+					}
+					else{
+						$('html').unblock();
+						$.notify('KPI update failed due to storage');
+						return;
+					}
+				}
+			});
+			
 			$.ajax({
 				url : restAddress + 'proasense_hella/kpi_formula',
 				type : 'POST',
@@ -1216,21 +1279,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 								$('html').unblock();
 
 								if (result.succeeded) {
-									
-									//merge kpi and sensor information
-									$.extend(kpiInformation, sensorKpi , kpi);
 																											
-									//inform the storage of the new kpi
-									$.ajax({
-										url : restAddress
-												+ 'proasense_hella/update',
-										type : 'POST',
-										data : '{"type":"INFORM","data":['
-												+ JSON
-														.stringify(kpiInformation)
-												+ ']}',
-									});
-									
 									$.notify('KPI updated', 'success');
 									kpiInfo[kpiIndex] = kpi;
 									kpiFormulas[kpiFormulaIndex] = kpiFormula;
@@ -1287,9 +1336,11 @@ this.changeTypeAndPartitionAsync = function(id) {
 				var newKpi = {};
 				var newKpiFormula = {};
 				var newsensorKpi = {};
+				var kpiusage = {};
 				var newkpiInformation = {};
 				var sensor1 = false, sensor2 = false, sensor3 = false;
 				newKpiFormula.term1_sensor_id = null;
+				newKpiFormula.term1_kpi_id = null;
 				newKpiFormula.operator_1 = null;
 				newKpiFormula.term2_kpi_id = null;
 				newKpiFormula.term2_sensor_id = null;
@@ -1391,7 +1442,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 																				.stringify(newKpiFormula)
 																		+ ']}',
 																success : function(result) {
-																	$('html').unblock();
+																	
 																	if (result.succeeded) {
 																		
 																		//merge kpi and sensor information
@@ -1408,34 +1459,42 @@ this.changeTypeAndPartitionAsync = function(id) {
 																					+ JSON
 																							.stringify(newkpiInformation)
 																					+ ']}',
-																		});
-																		
-																		$.notify('KPI added',
-																				'success');
-																		newKpi.children = [];
-																		for (var i = 0; i < kpiInfo.length; i++) {
-																			if (kpiInfo[i].id == newParentId) {
-																				kpiInfo[i].children
-																						.push(newKpi);
-																				break;
+																			success : function(result) {
+																				$('html').unblock();
+																				if (result.succeeded) {
+																					$.notify('KPI added',
+																							'success');
+																					newKpi.children = [];
+																					for (var i = 0; i < kpiInfo.length; i++) {
+																						if (kpiInfo[i].id == newParentId) {
+																							kpiInfo[i].children
+																									.push(newKpi);
+																							break;
+																						}
+																					}
+																					newKpiFormula.id = result.insertId[0];
+																					kpiInfo.push(newKpi);
+																					kpiFormulas
+																							.push(newKpiFormula);
+																					sensorEvents.push(newsensorKpi);
+																					newKpi.text = newKpi.name
+																							+ delEditBtn;
+																					$('#KPITree')
+																							.jstree()
+																							.create_node(
+																									newParentId,
+																									jQuery
+																											.extend(
+																													{},
+																													newKpi));
+																					screen1.closeScreen();
+																				}
+																				else{
+																					$.notify('Error adding kpi in storage');
+																				}
 																			}
-																		}
-																		newKpiFormula.id = result.insertId[0];
-																		kpiInfo.push(newKpi);
-																		kpiFormulas
-																				.push(newKpiFormula);
-																		sensorEvents.push(newsensorKpi);
-																		newKpi.text = newKpi.name
-																				+ delEditBtn;
-																		$('#KPITree')
-																				.jstree()
-																				.create_node(
-																						newParentId,
-																						jQuery
-																								.extend(
-																										{},
-																										newKpi));
-																		screen1.closeScreen();
+																		});
+
 																	} else {
 																		$.ajax({
 																			url: restAddress + 'proasense_hella/kpi',
@@ -1482,111 +1541,116 @@ this.changeTypeAndPartitionAsync = function(id) {
 												newsensorKpi.partitionid = "none";
 											newsensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
 											newsensorKpi.sampling_interval = $('#samplingInterval').val();
+											
+											$.ajax({
+												url : restAddress
+														+ 'proasense_hella/sensorevent',
+												type : 'POST',
+												async: false,
+												data : '{"type":"INSERT","data":['
+														+ JSON
+																.stringify(newsensorKpi)
+														+ ']}',
+												success : function(result) {
+													$('html').unblock();
+													if (result.succeeded) {
+														
+														newKpiFormula.term1_sensor_id = result.insertId[0];
+														newsensorKpi.id = result.insertId[0];
+													
+													} else {
+														$.ajax({
+															url: restAddress + 'proasense_hella/kpi',
+															type: 'POST',
+															data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
+															});
+														$.notify('Error adding sensor');
+													}
+												}
+											});
 										}
-										else{			//kpi made with another kpi
-											alert("NOT SUPPORTED YET");
-											break;
+										else{			
+											
+											//kpi made with another kpi
+											
+											//alert("NOT SUPPORTED YET");
+											//break
+											newKpiFormula.term1_kpi_id = $('#selectKpi1').find(":selected").attr("value");
+											kpiusage.term1_kpi_id = newKpiFormula.term1_kpi_id;
 										}
 										
 										$.ajax({
-											url : restAddress
-													+ 'proasense_hella/sensorevent',
-											type : 'POST',
-											data : '{"type":"INSERT","data":['
-													+ JSON
-															.stringify(newsensorKpi)
-													+ ']}',
-											success : function(result) {
-												$('html').unblock();
-												if (result.succeeded) {
-													
-													if(sensor1){
-														newKpiFormula.term1_sensor_id = result.insertId[0];
-														newsensorKpi.id = result.insertId[0];
-													}else
-														newKpiFormula.term1_kpi_id = result.insertId[0];
-													
-													
-													
-													$.ajax({
-																url : restAddress
-																		+ 'proasense_hella/kpi_formula',
-																type : 'POST',
-																data : '{"type":"INSERT","data":['
-																		+ JSON
-																				.stringify(newKpiFormula)
-																		+ ']}',
-																success : function(result) {
-																	$('html').unblock();
-																	if (result.succeeded) {
-																		
-																		//merge kpi and sensor information
-																		$.extend(newkpiInformation, newsensorKpi , newKpi);
-																																				
-																		//inform the storage of the new kpi
-																		$.ajax({
-																			url : restAddress
-																					+ 'proasense_hella/insert',
-																			type : 'POST',
-																			data : '{"type":"INFORM","data":['
-																					+ JSON
-																							.stringify(newkpiInformation)
-																					+ ']}',
-																		});
-																		
-																		$.notify('KPI added',
-																				'success');
-																		newKpi.children = [];
-																		for (var i = 0; i < kpiInfo.length; i++) {
-																			if (kpiInfo[i].id == newParentId) {
-																				kpiInfo[i].children
-																						.push(newKpi);
-																				break;
-																			}
-																		}
-																		newKpiFormula.id = result.insertId[0];
-																		kpiInfo.push(newKpi);
-																		kpiFormulas
-																				.push(newKpiFormula);
-																		if(sensor1)
-																			sensorEvents.push(newsensorKpi);
-																		newKpi.text = newKpi.name
-																				+ delEditBtn;
-																		$('#KPITree')
-																				.jstree()
-																				.create_node(
-																						newParentId,
-																						jQuery
-																								.extend(
-																										{},
-																										newKpi));
-																		screen1.closeScreen();
-																	} else {
-																		$.ajax({
-																			url: restAddress + 'proasense_hella/kpi',
-																			type: 'POST',
-																			data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
-																			});
-																		$.ajax({
-																			url: restAddress + 'proasense_hella/sensorevent',
-																			type: 'POST',
-																			data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
-																			});
-																		$.notify('Error adding formula');
-																	}
-																}
-															});
-												
-												} else {
-													$.ajax({
-														url: restAddress + 'proasense_hella/kpi',
-														type: 'POST',
-														data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
+												url : restAddress
+														+ 'proasense_hella/kpi_formula',
+												type : 'POST',
+												data : '{"type":"INSERT","data":['
+														+ JSON
+																.stringify(newKpiFormula)
+														+ ']}',
+												success : function(result) {
+													$('html').unblock();
+													if (result.succeeded) {
+														
+														//merge kpi and sensor information
+														if(sensor1)
+															$.extend(newkpiInformation, newsensorKpi , newKpi);
+														else
+															$.extend(newkpiInformation, kpiusage , newKpi);
+														//inform the storage of the new kpi
+														$.ajax({
+															url : restAddress
+																	+ 'proasense_hella/insert',
+															type : 'POST',
+															data : '{"type":"INFORM","data":['
+																	+ JSON
+																			.stringify(newkpiInformation)
+																	+ ']}',
 														});
-													$.notify('Error adding sensor');
+														
+														$.notify('KPI added',
+																'success');
+														newKpi.children = [];
+														for (var i = 0; i < kpiInfo.length; i++) {
+															if (kpiInfo[i].id == newParentId) {
+																kpiInfo[i].children
+																		.push(newKpi);
+																break;
+															}
+														}
+														newKpiFormula.id = result.insertId[0];
+														kpiInfo.push(newKpi);
+														kpiFormulas
+																.push(newKpiFormula);
+														if(sensor1)
+															sensorEvents.push(newsensorKpi);
+														newKpi.text = newKpi.name
+																+ delEditBtn;
+														$('#KPITree')
+																.jstree()
+																.create_node(
+																		newParentId,
+																		jQuery
+																				.extend(
+																						{},
+																						newKpi));
+														screen1.closeScreen();
+													} else {
+														$.ajax({
+															url: restAddress + 'proasense_hella/kpi',
+															type: 'POST',
+															data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
+															});
+														$.ajax({
+															url: restAddress + 'proasense_hella/sensorevent',
+															type: 'POST',
+															data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
+															});
+														$.notify('Error adding formula');
+													}
 												}
-											}
-										});
+											});
+								
+												
 										break;
 									case "composed":
 										
@@ -1948,7 +2012,7 @@ function Screen2(kpiInfo) {
 					var scr = this;
 					$('#targetTable').find('tr:last').find('td:last').click(function(e) {
 						scr.delTargetInfo(e.currentTarget);
-					})
+					});
 				}
 				
 				// Define number support format
@@ -2641,7 +2705,7 @@ function ScreenGraph(kpiInfo) {
 			scr.scrapRate(parseInt(Math.random() * 100 + 0.5))
 			scr.oee(parseInt(Math.random() * 100 + 0.5))
 			scr.totalUnits(parseInt(Math.random() * 20 + 0.5))
-		}, 1000)
+		}, 1000);
 	}
 
 	this.totalUnits = function(val) {

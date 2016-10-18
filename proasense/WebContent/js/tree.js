@@ -148,9 +148,8 @@ window.onload = function() {
 	if (!restAddress.endsWith('/')) {
 		restAddress = restAddress + '/';
 	}
-	
 	$.ajax({
-		url: restAddress + 'proasense_hella/sensor',
+		url: restAddress + 'proasense_hella/sensor/hella',
 		type: 'GET',
 		success: function(data) {
 			sensors = data;

@@ -30,6 +30,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.thrift.TDeserializer;
 import org.apache.thrift.protocol.TJSONProtocol;
 import org.codehaus.jackson.JsonNode;
@@ -53,12 +56,32 @@ public class StorageRESTClientManager {
     private StringBuilder requestUrl;
     private List<NameValuePair> params;
     private String queryString;
+    private Main mainreference;
 
-    public StorageRESTClientManager() {
+    public StorageRESTClientManager(Main ref) {
+
+        //HttpParams httpParameters = new BasicHttpParams();
+        //int timeoutConnection = 5000;
+        //HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+        //int timeoutSocket = 5000;
+        //HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+        
+        //##################################################################################################################################################
+        //##################################################################################################################################################
+        //##################################################################################################################################################
+        
+        //NOT USING TIMOUT OUT PARAMETER!!!
+        
+        //##################################################################################################################################################
+        //##################################################################################################################################################
+        //##################################################################################################################################################
+        
         client = new DefaultHttpClient();
         requestUrl = null;
         params = null;
         queryString = null;
+        
+        this.mainreference = ref;
         
         //get storage IPs, URLs and Ports from environment variables
 		storageURL = System.getenv("StorageURL");
@@ -100,7 +123,7 @@ public class StorageRESTClientManager {
             handler = new BasicResponseHandler();
             body = handler.handleResponse(response);
 
-            System.out.println("RECOMMENDATION.DEFAULT: " + body);
+            //System.out.println("RECOMMENDATION.DEFAULT: " + body);
             // The result is an array of feedback events serialized as JSON using Apache Thrift.
             // The feedback events can be deserialized into Java objects using Apache Thrift.
             ObjectMapper mapper = new ObjectMapper();
@@ -175,7 +198,7 @@ public class StorageRESTClientManager {
     
     //Lists
 
-    public String insertKPIStorage(String kpiInfo) {
+    public boolean insertKPIStorage(String kpiInfo) {
         
         // Default HTTP response and common properties for responses
         HttpResponse response = null;
@@ -184,8 +207,7 @@ public class StorageRESTClientManager {
         String body = null;
 
         try {
-            HttpPost
-            query = new HttpPost(storageURL);
+            HttpPost query = new HttpPost(storageURL);
             query.setHeader("Content-type", "application/json");
             query.setEntity(new StringEntity(kpiInfo));
             
@@ -200,7 +222,11 @@ public class StorageRESTClientManager {
             // Check status code
             status = response.getStatusLine().getStatusCode();
             if (status != 200) {
+            	
                 throw new RuntimeException("Failed! HTTP error code: " + status);
+                //apagar kpi da BD
+                
+                //return false;
             }
 
             // Get body
@@ -208,11 +234,11 @@ public class StorageRESTClientManager {
             body = handler.handleResponse(response);
 
             //result
-            return body;
+            return true;
             
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
-            return null;
+            return false;
         }
     }
     
@@ -258,7 +284,7 @@ public class StorageRESTClientManager {
         }
     }    
     
-    public String deleteKPIStorage(String kpiID) {
+    public boolean deleteKPIStorage(String kpiID) {
       
         // Default HTTP response and common properties for responses
         HttpResponse response = null;
@@ -281,6 +307,9 @@ public class StorageRESTClientManager {
             status = response.getStatusLine().getStatusCode();
             if (status != 200) {
                 throw new RuntimeException("Failed! HTTP error code: " + status);
+                
+                //keep the kpi in de DB
+                
             }
 
             // Get body
@@ -288,11 +317,11 @@ public class StorageRESTClientManager {
             body = handler.handleResponse(response);
 
             //result
-            return body;
+            return true;
             
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
-            return null;
+            return false;
         }
     }
     
@@ -324,7 +353,7 @@ public class StorageRESTClientManager {
             handler = new BasicResponseHandler();
             body = handler.handleResponse(response);
 
-            System.out.println("MACHINE LIST: " + body);
+            //System.out.println("MACHINE LIST: " + body);
             return body;
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
@@ -332,7 +361,7 @@ public class StorageRESTClientManager {
         }
     }
     
-    public String getAllSensors(){
+    public String getAllSensors(String context){
         // Default HTTP client and common properties for requests
         requestUrl = null;
       
@@ -343,8 +372,10 @@ public class StorageRESTClientManager {
         String body = null;
 
         // Query for sensor list
-        requestUrl = new StringBuilder("http://" + storageLocation + ":" + storagePortRegistryC + storageRegistryContext + "/query/sensor/list");
-
+        requestUrl = new StringBuilder("http://" + storageLocation + ":" + storagePortRegistryC + storageRegistryContext + "/query/sensor/list?dataset="+context);
+        
+        //System.out.println("Request URL: "+requestUrl);
+        
         try {
             HttpGet query = new HttpGet(requestUrl.toString());
             query.setHeader("Content-type", "application/json");
@@ -360,6 +391,8 @@ public class StorageRESTClientManager {
             handler = new BasicResponseHandler();
             body = handler.handleResponse(response);
 
+            //System.out.println("body: "+body);
+            
             //System.out.println("SENSOR LIST: " + body);
             return body;
         } catch (Exception e) {
@@ -396,7 +429,7 @@ public class StorageRESTClientManager {
             handler = new BasicResponseHandler();
             body = handler.handleResponse(response);
 
-            System.out.println("PRODUCT LIST: " + body);
+            //System.out.println("PRODUCT LIST: " + body);
             return body;
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
@@ -432,7 +465,7 @@ public class StorageRESTClientManager {
             handler = new BasicResponseHandler();
             body = handler.handleResponse(response);
 
-            System.out.println("MOULD LIST: " + body);
+            //System.out.println("MOULD LIST: " + body);
             return body;
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
@@ -480,7 +513,7 @@ public class StorageRESTClientManager {
             handler = new BasicResponseHandler();
             body = handler.handleResponse(response);
 
-            System.out.println("MACHINE PROPRIETIES: " + body);
+            //System.out.println("MACHINE PROPRIETIES: " + body);
             return body;
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
@@ -488,7 +521,7 @@ public class StorageRESTClientManager {
         }
     }
     
-    public String getSensorProprerties(String sensorId){
+    public String getSensorProprerties(String sensorId,String context){
         // Default HTTP client and common properties for requests
         requestUrl = null;
         params = null;
@@ -501,15 +534,7 @@ public class StorageRESTClientManager {
         String body = null;
 
         // Query for sensor properties
-        requestUrl = new StringBuilder("http://" + storageLocation + ":" + storagePortRegistryC + storageRegistryContext + "/query/sensor/properties");
-        
-        params = new LinkedList<NameValuePair>();
-        params.add(new BasicNameValuePair("sensorId", sensorId));
-        
-        queryString = URLEncodedUtils.format(params, "utf-8");
-        requestUrl.append("?");
-        requestUrl.append(queryString);
-
+        requestUrl = new StringBuilder("http://" + storageLocation + ":" + storagePortRegistryC + storageRegistryContext + "/query/sensor/properties?dataset="+context+"&sensorId="+sensorId);
 
         try {
             HttpGet query = new HttpGet(requestUrl.toString());
@@ -572,7 +597,7 @@ public class StorageRESTClientManager {
             handler = new BasicResponseHandler();
             body = handler.handleResponse(response);
 
-            System.out.println("PRODUCT PROPRIETIES: " + body);
+            //System.out.println("PRODUCT PROPRIETIES: " + body);
             return body;
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
@@ -618,7 +643,7 @@ public class StorageRESTClientManager {
             handler = new BasicResponseHandler();
             body = handler.handleResponse(response);
 
-            System.out.println("MOULD PROPRIETIES: " + body);
+            //System.out.println("MOULD PROPRIETIES: " + body);
             return body;
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());

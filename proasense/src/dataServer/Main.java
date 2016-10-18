@@ -89,12 +89,12 @@ public class Main extends HttpServlet {
 
 				switch (tableName) {
 				case "sensor": // sensor
-
+					
 					// string de teste
 					if (testing)
 						responseStr = "[{\"id\":\"sensor_1_id\",\"name\":\"sensor 1\"},{\"id\":\"sensor_2_id\",\"name\":\"sensor 2\"}]";
 					else
-						responseStr = this.getSensorIdsNameList();
+						responseStr = this.getSensorIdsNameList(idReq);
 
 					writeLogMsg(tableName + ":" + responseStr);
 					response.getWriter().println(responseStr); // sending the
@@ -102,12 +102,17 @@ public class Main extends HttpServlet {
 					break;
 
 				case "sensorProperties": // sensorEvents
-
+					
+					String reqId = idReq.substring(0,idReq.indexOf('_'));
+					String context = idReq.substring(idReq.indexOf('_')+1);
+					
+					//System.out.println("Contexto : "+context);
+					
 					// string de teste
 					if (testing)
 						responseStr = "[{\"name\":\"event 1\",\"type\":\"boolean\",\"partition\":\"true\"},{\"name\":\"event 2\",\"type\":\"string\",\"partition\":\"false\"},{\"name\":\"event 3\",\"type\":\"double\",\"partition\":\"true\"},{\"name\":\"event 4\",\"type\":\"long\",\"partition\":\"true\"}]";
 					else
-						responseStr = this.getSensorPropertiesList(idReq);
+						responseStr = this.getSensorPropertiesList(reqId,context);
 
 					writeLogMsg(tableName + ":" + responseStr);
 					response.getWriter().println(responseStr); // sending the
@@ -223,13 +228,13 @@ public class Main extends HttpServlet {
 		}
 	}
 
-	private String getSensorIdsNameList() {
+	private String getSensorIdsNameList(String context) {
 
 		String responseStr;
 		responseStr = "[";
 
 		try {
-			String result = this.SRCM.getAllSensors();
+			String result = this.SRCM.getAllSensors(context);
 			JSONParser parser = new JSONParser();
 			JSONObject sensors = (JSONObject) parser.parse(result);
 
@@ -244,7 +249,7 @@ public class Main extends HttpServlet {
 
 				for (Object s : sensorList) {
 
-					sensorProperties = this.SRCM.getSensorProprerties(s.toString());
+					sensorProperties = this.SRCM.getSensorProprerties(s.toString(),context);
 
 					properties = (JSONObject) parser.parse(sensorProperties);
 
@@ -265,14 +270,14 @@ public class Main extends HttpServlet {
 		return responseStr;
 	}
 
-	private String getSensorPropertiesList(String sensorId) {
+	private String getSensorPropertiesList(String sensorId, String context) {
 
 		String responseStr;
 		responseStr = "[";
 
 		try {
 
-			String result = this.SRCM.getSensorProprerties(sensorId);
+			String result = this.SRCM.getSensorProprerties(sensorId, context);
 			JSONParser parser = new JSONParser();
 			JSONObject properties;
 			properties = (JSONObject) parser.parse(result);
@@ -806,6 +811,8 @@ private String getParamValueOf(String paramString){
 			JSONObject obj = (JSONObject) parsedData.get(0);
 			String kpiJSON;
 			
+			boolean result = false;
+			
 			switch(informType){
 			case "delete":
 				if(testing){
@@ -813,8 +820,10 @@ private String getParamValueOf(String paramString){
 					System.out.println("Envia inform do tipo delete com :");
 					System.out.println(obj.get("id").toString());
 					System.out.println("\n################################################################################\n\n");
+					
+					result = true;
 				}else
-					SRCM.deleteKPIStorage(obj.get("id").toString());
+					result = SRCM.deleteKPIStorage(obj.get("id").toString());
 				
 				break;
 			case "insert":
@@ -826,8 +835,10 @@ private String getParamValueOf(String paramString){
 					System.out.println("Envia inform do tipo add com :");
 					System.out.println(kpiJSON);
 					System.out.println("\n################################################################################\n\n");
+					
+					result = true;
 				}else
-					SRCM.insertKPIStorage(kpiJSON);
+					result = SRCM.insertKPIStorage(kpiJSON);
 				
 				break;
 			case "update":
@@ -839,15 +850,26 @@ private String getParamValueOf(String paramString){
 					System.out.println("Envia inform do tipo update com :");
 					System.out.println(kpiJSON);
 					System.out.println("\n################################################################################\n\n");
-				}else
-					SRCM.updateKPIStorage(kpiJSON);
+					result = true;
+				}else{
 					
+					if(SRCM.deleteKPIStorage(obj.get("id").toString())){
+						result = SRCM.insertKPIStorage(kpiJSON);
+						break;
+					}
+					result = false;
 				
-				break;
+					break;
+				}
+					
 			default:
+				result = true;
 				break;
+				
 			}
 			
+			response.getWriter().println("{\"succeeded\":"+result+"}");
+						
 		} catch (Exception e) {
 			try {
 				response.getWriter()
@@ -891,7 +913,7 @@ private String getParamValueOf(String paramString){
 				
 				storageModelObject.put("kpiId", obj.get("id"));
 				storageModelObject.put("kpiName", obj.get("name"));
-				storageModelObject.put("Context", obj.get("company_context"));
+				storageModelObject.put("context", obj.get("company_context"));
 				storageModelObject.put("kpiDescription", obj.get("description"));
 				
 				if(existingKPI)
@@ -921,7 +943,7 @@ private String getParamValueOf(String paramString){
 				
 				storageModelObject.put("kpiId", obj.get("id"));
 				storageModelObject.put("kpiName", obj.get("name"));
-				storageModelObject.put("Context", obj.get("company_context"));
+				storageModelObject.put("context", obj.get("company_context"));
 				storageModelObject.put("kpiDescription", obj.get("description"));
 
 				if(existingKPI)
@@ -979,7 +1001,7 @@ private String getParamValueOf(String paramString){
 					
 					storageModelObject.put("kpiId", obj.get("id"));
 					storageModelObject.put("kpiName", obj.get("name"));
-					storageModelObject.put("Context", obj.get("company_context"));
+					storageModelObject.put("context", obj.get("company_context"));
 					storageModelObject.put("kpiDescription", obj.get("description"));
 
 					if(existingKPI)
@@ -1188,6 +1210,6 @@ private String getParamValueOf(String paramString){
 		System.out.println("Database path: " + dbPath);
 		System.out.println("LogSystem configured in: " + logPath);
 		 
-		this.SRCM = new StorageRESTClientManager();	
+		this.SRCM = new StorageRESTClientManager(this);	
 	}
 }
