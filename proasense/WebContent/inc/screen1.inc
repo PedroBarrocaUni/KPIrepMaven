@@ -28,7 +28,7 @@
 					<option value="aggregate">Aggregate Measure</option>
 					<option value="composed">Composed Measure</option>
 				</select>
-		        <select id="numberSupport" class="box grey form-control form-control-custom2 select-10" <!--onchange="addKpiNumberSupportFormat()"--> disabled="true">
+		        <select id="numberSupport" class="box grey form-control form-control-custom2 select-15" <!--onchange="addKpiNumberSupportFormat()"--> disabled="true">
 		          	<option value="" disabled selected hidden>Number Type</option>
 		          	<option value="numeric">Numeric</option>
 		          	<option value="boolean">Boolean</option>
@@ -36,7 +36,7 @@
 		          	<option value="date">Date</option>
 		          	<option value="category">Category</option>
 		        </select>
-				<select id="companyContext" class="box grey form-control form-control-custom2 select-10">
+				<select id="companyContext" class="box grey form-control form-control-custom2 select-15">
 					<option value="hella" selected>Hella Saturnus</option>
 					<option value="mhwirth">MH Wirth</option>
 				</select>
@@ -59,7 +59,7 @@
 				&nbsp;
 			</td>
 			<td>
-				<select id="selectSensor1" class="box grey sensorBox form-control form-control-custom2 select-45">
+				<select id="selectSensor1" class="box grey sensorBox form-control form-control-custom2 select-45" >
 					<option value="" disabled selected hidden>Select Sensor</option>
 				</select>
 				<select id="selectSensorEvent1" class="box grey eventBox eventBoxType form-control form-control-custom2 select-45">
@@ -179,7 +179,7 @@
 				&nbsp;
 			</td>
 			<td>
-				<select id="selectSensor3" class="box grey sensorBox sensorChoice form-control select-45">
+				<select id="selectSensor3" class="box grey sensorBox sensorChoice form-control select-45" >
 					<option value="" disabled selected hidden>Select Sensor</option>
 				</select>
 				<select id="selectSensorEvent3" class="box grey eventBox eventBoxType form-control select-45">
@@ -197,7 +197,7 @@
 				&nbsp;
 			</td>
 			<td>
-				<select id="selectSensor4" class="box grey sensorBox sensorChoice form-control select-45">
+				<select id="selectSensor4" class="box grey sensorBox sensorChoice form-control select-45" >
 					<option value="" disabled selected hidden>Select Sensor</option>
 				</select>
 				<select id="selectSensorEvent4" class="box grey eventBox eventBoxType form-control select-45">
@@ -215,7 +215,7 @@
 				&nbsp;
 			</td>
 			<td>
-				<select id="selectSensor5" disabled class="box grey sensorBox form-control thEl sensorChoice select-45">
+				<select id="selectSensor5" disabled class="box grey sensorBox form-control thEl sensorChoice select-45" >
 					<option value="" disabled selected hidden>Select Sensor</option>
 				</select>
 				<select id="selectSensorEvent5" class="box grey eventBox eventBoxType form-control select-45">
@@ -237,8 +237,7 @@
 				<input id="samplingRate" class="form-control" type="textbox" data-toggle="tooltip" data-placement="right" title="Enter a number value for sampling frequency (max: 1 digits)" required maxlength="1"/>
 			</td>
 			<td colspan=4>
-
-				<select id="samplingInterval" class="box grey form-control select-20">
+				<select id="samplingInterval" class="box grey form-control form-control-custom2">
 					<option value="" disabled selected hidden>Interval</option>
 					<option value="week">Week</option>
 					<option value="day">Day</option>

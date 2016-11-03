@@ -152,6 +152,7 @@ window.onload = function() {
 		url: restAddress + 'proasense_hella/sensor/hella',
 		type: 'GET',
 		success: function(data) {
+			$("#companyContext").prop( "disabled", false);
 			sensors = data;
 			screen1.loadSensors();
 		}
@@ -230,6 +231,7 @@ window.onload = function() {
 		success: function(data) {
 //			window.alert("sdsdsssds");
 			$('html').unblock();
+
 			kpiInfo = data;
 //			window.alert("AJAX:(proasense_hella/kpi) - data:"+JSON.stringify(data));
 //			window.alert("AJAX:(proasense_hella/kpi) - kpiInfo:"+JSON.stringify(kpiInfo));
@@ -251,7 +253,6 @@ window.onload = function() {
 					$('#KPITree').jstree().create_node(null, tmpKpiInfo[i]);
 				}
 			}
-
 		}
 	});
 	

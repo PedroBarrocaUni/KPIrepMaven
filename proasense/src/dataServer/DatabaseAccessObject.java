@@ -174,7 +174,7 @@ public class DatabaseAccessObject {
 		Object resultObject = null;
 		
 		String query = "";
-		if (!aggregation.equals("none")){
+		if (!aggregation.equals("NONE")){
 			query = heatMap.getHeatMapQueryString(aggregation);
 			heatMap = getHeatMapFromDb(query, heatMap, contextualInformation);
 			heatMap.setHeatMapValues();

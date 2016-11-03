@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
+import java.awt.geom.RoundRectangle2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +19,13 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -33,6 +39,12 @@ import org.apache.commons.lang.SystemUtils;
 import dataServer.database.DBConfig;
 import dataServer.database.enums.SamplingInterval;
 import dataServer.database.enums.TableValueType;
+import dataServer.utils.myPoint;
+import dataServer.poninomialPrediction.ProasensePredictivePolynomial;
+import dataServer.utils.RegressionResult;
+import dataServer.utils.RegressionResults;
+import dataServer.utils.myDataset;
+import dataServer.utils.myDatasets;
 
 @WebServlet("/data/*")
 public class Main extends HttpServlet {
@@ -230,44 +242,20 @@ public class Main extends HttpServlet {
 
 	private String getSensorIdsNameList(String context) {
 
-		String responseStr;
-		responseStr = "[";
-
 		try {
-			String result = this.SRCM.getAllSensors(context);
-			JSONParser parser = new JSONParser();
-			JSONObject sensors = (JSONObject) parser.parse(result);
+		String result = this.SRCM.getAllSensors(context);
+		JSONParser parser = new JSONParser();
+		JSONObject sensors = (JSONObject) parser.parse(result);
+		
+		JSONArray sensorList = (JSONArray) sensors.get("sensor");
 
-			JSONArray sensorList = (JSONArray) sensors.get("sensor");
-
-			if (sensorList.equals("") || sensorList == null || sensorList.isEmpty()) {
-				responseStr = responseStr.concat("]");
-				writeLogMsg("\t\t\t\t\t\t Pedido de Sensores: ERRO!!!!");
-			} else {
-				String sensorProperties;
-				JSONObject properties;
-
-				for (Object s : sensorList) {
-
-					sensorProperties = this.SRCM.getSensorProprerties(s.toString(),context);
-
-					properties = (JSONObject) parser.parse(sensorProperties);
-
-					responseStr = responseStr.concat("{\"id\":\"" + properties.get("sensorId") + "\",\"name\":\""
-							+ properties.get("name") + "\"},");
-				}
-
-				responseStr = responseStr.substring(0, responseStr.length() - 1).concat("]");
-			}
+			return sensorList.toJSONString();
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		if (responseStr.length() == 1)
-			responseStr = responseStr.concat("]");
-
-		return responseStr;
+		return "";
+		
 	}
 
 	private String getSensorPropertiesList(String sensorId, String context) {
@@ -510,15 +498,129 @@ public class Main extends HttpServlet {
 			Object labels = dAO.getXLabels(samplingInterval);
 			Object labelsTimeStamp = dAO.getXLabelsTimeStamp();
 			Object title = dAO.getTitle(kpiId);
-
+			
+			//create prediction object
+			JSONArray pred = new JSONArray();
+			String predEnable = requestData.get("withPrediction");
+			
+			if(predEnable.equals("true")){
+				
+				//calculation of forecasts
+				JSONArray kValues = (JSONArray)data;
+				JSONArray timestamps = (JSONArray)labelsTimeStamp;
+				int nrOfLines = kValues.size();
+				int nrOfValues = timestamps.size();
+				int granularity = Integer.parseInt((requestData.get("granularityID")).toString());
+				
+						
+				myDataset[] datasets = new myDataset[nrOfLines];
+				
+				int numb;
+				
+				for(int j=0; j< nrOfLines;j++)
+				{	
+					numb = 0;
+					for( int ind = 0; ind < nrOfValues; ind++ )
+						if(((JSONArray)kValues.get(j)).get(ind) != null)
+							numb++;
+					
+					//if(numb>0)
+					
+					myPoint[] points = new myPoint[numb];	
+					
+					for(int i=0, pointInd=0; i<nrOfValues;i++){
+						//problema em calular aqui!! prende no null
+						if(((JSONArray)kValues.get(j)).get(i) != null){
+							points[pointInd] = new myPoint(Double.parseDouble(timestamps.get(i).toString()),Double.parseDouble(((JSONArray)kValues.get(j)).get(i).toString()));
+							pointInd++;
+						}
+					}
+					datasets[j]= new myDataset(points);
+				}
+				
+				myDatasets mydatasets = new myDatasets( granularity, nrOfValues, datasets);
+	
+				ProasensePredictivePolynomial algorithm = new ProasensePredictivePolynomial();
+				RegressionResults results = algorithm.generatePrediction(mydatasets);
+	
+				int maxLength=0, maxIndex=0;
+				int graphLength=nrOfValues;
+				List<RegressionResult> RRs = results.getRegressionResults();
+				int numberOfRegressions = RRs.size();
+				
+				ArrayList<Double> predLine = new ArrayList<Double>();
+				
+				double[] stamps;
+				double[] values;	
+				Double sAux;
+				
+				for(int ind = 0, len = 0 ; ind < numberOfRegressions ; ind ++){
+					len = RRs.get(ind).getPredictions().length; 
+					if(len > maxLength){
+						maxLength=len;
+						maxIndex = ind;
+					}
+				}
+				
+				//new length of the graph
+				graphLength+=maxLength;
+	
+				//put the result in the correct format to the chart
+				for(int ind = 0 ; ind < numberOfRegressions ; ind ++){
+					stamps = RRs.get(ind).getIndependentVariables();
+					values = RRs.get(ind).getPredictions();
+					
+					//get new values to the correct position
+					for(int j = 0; j<graphLength ; j++ ){
+						if(j < nrOfValues){
+							predLine.add(null);//predLine.add(new JSONObject());
+						}else{
+							predLine.add(values[j-nrOfValues]);//predLine.add(String.valueOf(values[j-nrOfValues]));
+						}
+					}
+					
+					//get 2 last known values
+					for(int last = nrOfValues-1; last >= 0; last --){
+						sAux = (Double)((JSONArray)kValues.get(ind)).get(last);
+						System.out.println("valor : "+sAux);
+						if( sAux != null){
+							
+							predLine.set(last, sAux);
+							break;
+						}
+					}
+					pred.add((Object)predLine.clone());
+					predLine.clear();
+				}
+				
+				String newTimeStamp;
+				
+				for(int ind=0; ind < maxLength; ind++){
+					//set new timestamps
+					newTimeStamp = String.format("%.0f",(RRs.get(maxIndex).getIndependentVariables())[ind]);
+					((ArrayList)labelsTimeStamp).add(newTimeStamp);
+					
+					//set new labels
+					Date dValue = new Date(Long.parseLong(newTimeStamp));
+					((ArrayList)labels).add(dAO.getLabelName(samplingInterval,new SimpleDateFormat("YYYY-MM-dd hh:mm:ss").format(dValue),false));
+				
+					//cover new positions
+					for(int i = 0; i < nrOfLines; i++ ){
+						((ArrayList)((ArrayList)data).get(i)).add(null);
+					}
+				}
+			}
+			
 			writeLogMsg("--------------- GRAPH DATA ----------------------------");
 			writeLogMsg("Data: " + data.toString());
+			writeLogMsg("Pred: " +pred.toString());
 			writeLogMsg("Labels: " + labels.toString());
 			writeLogMsg("Labels Time Stamp: " + labelsTimeStamp.toString());
 			writeLogMsg("Title: " + title.toString());
 			writeLogMsg("--------------- END GRAPH DATA ------------------------");
 
 			obj.put("data", data);
+			obj.put("predictions", pred);
 			obj.put("legend", legend);
 			obj.put("labels", labels);
 			obj.put("labelsTimeStamp", labelsTimeStamp);
@@ -604,7 +706,6 @@ private String getParamValueOf(String paramString){
 			JSONParser parser = new JSONParser();
 
 			writeLogMsg("---------- START HEATMAP DATA -------------------------");
-			
 			Object data = dAO.getHeatMapData(kpiId, tableValueType, startTime, endTime, samplingInterval, contextName, varX, varY);
 			Object yLabels = dAO.getHeatMapYLabels();
 			Object xLabels = dAO.getHeatMapXLabels();
@@ -828,7 +929,7 @@ private String getParamValueOf(String paramString){
 				break;
 			case "insert":
 				
-				kpiJSON = convertKPIObjectToJSON(obj,false);
+				kpiJSON = convertKPIObjectToJSON(obj);
 				
 				if(testing){
 					System.out.println("\n\n################################################################################\n");
@@ -843,7 +944,7 @@ private String getParamValueOf(String paramString){
 				break;
 			case "update":
 					
-				kpiJSON = convertKPIObjectToJSON(obj,true);
+				kpiJSON = convertKPIObjectToJSON(obj);
 				
 				if(testing){
 					System.out.println("\n\n################################################################################\n");
@@ -884,7 +985,7 @@ private String getParamValueOf(String paramString){
 	}
 
 	@SuppressWarnings("unchecked")
-	private String convertKPIObjectToJSON(JSONObject obj, boolean existingKPI){
+	private String convertKPIObjectToJSON(JSONObject obj){
 		
 		// parsing the information to integrate with storage
 		JSONObject storageModelObject = new JSONObject();
@@ -915,11 +1016,7 @@ private String getParamValueOf(String paramString){
 				storageModelObject.put("kpiName", obj.get("name"));
 				storageModelObject.put("context", obj.get("company_context"));
 				storageModelObject.put("kpiDescription", obj.get("description"));
-				
-				if(existingKPI)
-					storageModelObject.put("kpiOperation", "MODIFY");
-				else
-					storageModelObject.put("kpiOperation", "ADD");
+				storageModelObject.put("kpiOperation", "ADD");
 				storageModelObject.put("operation", operation);
 									
 				break;
@@ -945,11 +1042,7 @@ private String getParamValueOf(String paramString){
 				storageModelObject.put("kpiName", obj.get("name"));
 				storageModelObject.put("context", obj.get("company_context"));
 				storageModelObject.put("kpiDescription", obj.get("description"));
-
-				if(existingKPI)
-					storageModelObject.put("kpiOperation", "MODIFY");
-				else
-					storageModelObject.put("kpiOperation", "ADD");
+				storageModelObject.put("kpiOperation", "ADD");
 				storageModelObject.put("operation", operation);
 				
 				break;
@@ -1003,11 +1096,7 @@ private String getParamValueOf(String paramString){
 					storageModelObject.put("kpiName", obj.get("name"));
 					storageModelObject.put("context", obj.get("company_context"));
 					storageModelObject.put("kpiDescription", obj.get("description"));
-
-					if(existingKPI)
-						storageModelObject.put("kpiOperation", "MODIFY");
-					else
-						storageModelObject.put("kpiOperation", "ADD");
+					storageModelObject.put("kpiOperation", "ADD");
 					storageModelObject.put("operation", operation);
 				}
 				
@@ -1210,6 +1299,6 @@ private String getParamValueOf(String paramString){
 		System.out.println("Database path: " + dbPath);
 		System.out.println("LogSystem configured in: " + logPath);
 		 
-		this.SRCM = new StorageRESTClientManager(this);	
+		this.SRCM = new StorageRESTClientManager();	
 	}
 }

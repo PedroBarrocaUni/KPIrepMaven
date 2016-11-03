@@ -28,6 +28,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
@@ -52,36 +55,29 @@ public class StorageRESTClientManager {
     private static String storagePortReadC;// NOVO -> 8081
     
     // Default HTTP client and common properties for requests
-    private final DefaultHttpClient client;
+    private static CloseableHttpClient client;
+    private static PoolingHttpClientConnectionManager connManager;
     private StringBuilder requestUrl;
     private List<NameValuePair> params;
     private String queryString;
     private Main mainreference;
-
-    public StorageRESTClientManager(Main ref) {
+    
+    public StorageRESTClientManager() {
 
         //HttpParams httpParameters = new BasicHttpParams();
         //int timeoutConnection = 5000;
         //HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
         //int timeoutSocket = 5000;
         //HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-        
-        //##################################################################################################################################################
-        //##################################################################################################################################################
-        //##################################################################################################################################################
-        
-        //NOT USING TIMOUT OUT PARAMETER!!!
-        
-        //##################################################################################################################################################
-        //##################################################################################################################################################
-        //##################################################################################################################################################
-        
-        client = new DefaultHttpClient();
+
+    	connManager = new PoolingHttpClientConnectionManager();
+        connManager.setDefaultMaxPerRoute(20);
+        connManager.setMaxTotal(40);    	
+    	
+        client = HttpClients.custom().setConnectionManager(connManager).build();
         requestUrl = null;
         params = null;
         queryString = null;
-        
-        this.mainreference = ref;
         
         //get storage IPs, URLs and Ports from environment variables
 		storageURL = System.getenv("StorageURL");
@@ -90,6 +86,10 @@ public class StorageRESTClientManager {
 		storagePortRegistryC = System.getenv("StoragePortRegistryC");
     }
 
+    public void reconnect(){
+    	//if(this.client.)
+    }
+    
     public List<RecommendationEvent> /*List<FeedbackEvent>*/ readFromStorage(String startDate, String endDate) {
         //        GetMethod get = new GetMethod("http://" + storageLocation + ":" + storagePort + storageContext + "/query/feedback/default/?startDate=" + startDate + "&endDate=" + endDate);
         // Default HTTP response and common properties for responses
@@ -219,14 +219,17 @@ public class StorageRESTClientManager {
             
             response = client.execute(query);
 
+            System.out.println("\n\n\nResponse:\n"+response.toString());
+            
             // Check status code
             status = response.getStatusLine().getStatusCode();
             if (status != 200) {
             	
-                throw new RuntimeException("Failed! HTTP error code: " + status);
+                //throw new RuntimeException("Failed! HTTP error code: " + status);
                 //apagar kpi da BD
+                System.out.println("Error accessing storage: "+status);
                 
-                //return false;
+                return false;
             }
 
             // Get body
@@ -243,7 +246,7 @@ public class StorageRESTClientManager {
     }
     
  
-    public String updateKPIStorage(String kpiInfo) {
+    public boolean updateKPIStorage(String kpiInfo) {
         
         // Default HTTP response and common properties for responses
         HttpResponse response = null;
@@ -268,7 +271,10 @@ public class StorageRESTClientManager {
             // Check status code
             status = response.getStatusLine().getStatusCode();
             if (status != 200) {
-                throw new RuntimeException("Failed! HTTP error code: " + status);
+                //throw new RuntimeException("Failed! HTTP error code: " + status);
+            	 System.out.println("Error accessing storage: "+status);
+                 
+                 return false;
             }
 
             // Get body
@@ -276,11 +282,11 @@ public class StorageRESTClientManager {
             body = handler.handleResponse(response);
 
             //result
-            return body;
+            return true;
             
         } catch (Exception e) {
             System.out.println(e.getClass().getName() + ": " + e.getMessage());
-            return null;
+            return false;
         }
     }    
     
@@ -300,16 +306,19 @@ public class StorageRESTClientManager {
         	System.out.println(query.toString());
         	System.out.println("\n\n\n########################################################################################################\n\n\n");
             
-        	
         	response = client.execute(query);
+
+            System.out.println("\n\n\nResponse:\n"+response.toString());
 
             // Check status code
             status = response.getStatusLine().getStatusCode();
             if (status != 200) {
-                throw new RuntimeException("Failed! HTTP error code: " + status);
+                //throw new RuntimeException("Failed! HTTP error code: " + status);
                 
                 //keep the kpi in de DB
+            	System.out.println("Error accessing storage: "+status);
                 
+                return false;
             }
 
             // Get body
@@ -372,7 +381,7 @@ public class StorageRESTClientManager {
         String body = null;
 
         // Query for sensor list
-        requestUrl = new StringBuilder("http://" + storageLocation + ":" + storagePortRegistryC + storageRegistryContext + "/query/sensor/list?dataset="+context);
+        requestUrl = new StringBuilder("http://" + storageLocation + ":" + storagePortRegistryC + storageRegistryContext + "/query/sensor/list2?dataset="+context);
         
         //System.out.println("Request URL: "+requestUrl);
         

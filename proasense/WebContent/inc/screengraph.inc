@@ -81,16 +81,18 @@
 			<br>
 			<br>
 			<select id="granularityChart" class="box btn btn-primary form-control granularityBoxes">
-				<option value="hourly">Hourly</option>
-				<option value="daily">Daily</option>
-				<option value="weekly" style="display:none">Weekly</option>
-				<option selected value="monthly">Monthly</option>
+				<option id="4" value="hourly">Hourly</option>
+				<option id="3" value="daily">Daily</option>
+				<option id="2" value="weekly" style="display:none">Weekly</option>
+				<option id="1" selected value="monthly">Monthly</option>
 			</select>
 			<br>
 			<br>
 			<div id="GlobalIncludeIdDiv" class="checkbox disabled">
 				<label><input id="GlobalIncludeId" type="checkbox" value="GlobalInclude" disabled checked>Include Global</label>
-			</div>			
+			</div>
+			<br>
+			<input id="predictionSwitch" type="checkbox" data-label-text="Prediction" data-size="small" data-toggle="toggle" data-on="Ready" data-off="Not Ready">
 		</td>
 	</tr>
 	<tr>

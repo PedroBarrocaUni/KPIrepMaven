@@ -157,11 +157,13 @@ function Screen1(elInfo) {
 	
 	this.loadEventProperties = function(asynchronous) {
 	
+
+		var context = $('#companyContext').val();
+		
 		switch ($('#calculationType').val()) {
 		case 'simple':
 			
 			var sensorId = $('#selectSensor1').val();
-			var context = $('#companyContext').val();
 			// get sensor events
 			$.ajax({
 				url : restAddress + 'proasense_hella/sensorProperties/'
@@ -202,7 +204,7 @@ function Screen1(elInfo) {
 			// get sensor events
 			$.ajax({
 				url : restAddress + 'proasense_hella/sensorProperties/'
-						+ sensorId,
+						+ sensorId+"_"+context,
 				type : 'GET',
 				async: asynchronous ,
 				success : function(events) {
@@ -241,7 +243,7 @@ function Screen1(elInfo) {
 			// get sensor events
 			$.ajax({
 				url : restAddress + 'proasense_hella/sensorProperties/'
-						+ sensorId,
+						+ sensorId+"_"+context,
 				type : 'GET',
 				async: asynchronous ,
 				success : function(events) {
@@ -271,13 +273,15 @@ function Screen1(elInfo) {
 	}
 
 	
-	this.loadEventPropertiesAsync = function(id) {	
+	this.loadEventPropertiesSync = function(id) {	
 		
 		var sensorId = $('#selectSensor'+id).val();
+		var context = $('#companyContext').val();
+		
 		// get sensor events
 		$.ajax({
 			url : restAddress + 'proasense_hella/sensorProperties/'
-					+ sensorId,
+					+ sensorId+"_"+context,
 			type : 'GET',
 			async: false ,
 			success : function(events) {
@@ -308,7 +312,8 @@ function Screen1(elInfo) {
 		case 'simple':
 
 			var sensorEventType = $('#selectSensorEvent1').find(":selected").attr("type");
-			sensorEventPartitionable = $('#selectSensorEvent1').find(":selected").attr("partition").toUpperCase();
+			if(sensorEventType!=null)
+				sensorEventPartitionable = $('#selectSensorEvent1').find(":selected").attr("partition").toUpperCase();
 
 			$('#eventType1').css('display', 'block')
 			$('#eventType1').html('Type: '+sensorEventType);
@@ -437,8 +442,6 @@ this.changeTypeAndPartitionAsync = function(id) {
 	
 	// window.alert("screen 1 - OK");
 	this.loadSensors = function() {
-
-		$('.sensorBox').prop( "disabled", false );
 		
 		// load dos sensores
 		var tmpVal = [];
@@ -454,6 +457,9 @@ this.changeTypeAndPartitionAsync = function(id) {
 				$('.sensorBox').eq(i).val(tmpVal[i]);
 			}
 		}
+
+		$('.sensorBox').prop( "disabled", false );
+		$('#companyContext').prop( "disabled", false );
 	}
 	this.loadAggregationTypes = function() {
 		// load dos tipos de aggregation
@@ -529,13 +535,65 @@ this.changeTypeAndPartitionAsync = function(id) {
 		}
 		return false;
 	}	
-
-	// window.alert("screen 1 - OK");
-
+	
+	// window.alert("screen 1 - OK");	
 	this.changeContextEnt = function(){
 		
 		var myContext = $('#companyContext').val();
 		$('.sensorBox').prop( "disabled", true );
+		$('#companyContext').prop( "disabled", true );
+					
+		$('.elRow').css('display', 'none');
+		$('.elAggRow').css('display', 'none');
+		if ($('#calculationType').val() == 'aggregate' && $('#kpiSensor1').val() != null) {
+			$('.elAggRow').css('display', 'table-row');
+		} else if ($('#calculationType').val() == 'composed' && ($('#kpiSensor2').val() != null || $('#kpiSensor3').val() != null || $('#kpiSensor4').val() != null)) {
+			$('.elRow').css('display', 'table-row');
+		}
+		$('.kpi').css('display', 'none');
+		$('.simple').css('display', 'none');
+		$('.aggregate').css('display', 'none');
+		$('.composed').css('display', 'none')
+		$('.' + ($('#calculationType').val())).css('display', 'table-row');
+				
+		$("#selectSensor1 option:eq(0)").prop('selected',true);
+		$("#selectSensor2 option:eq(0)").prop('selected',true);
+		$(".eventBox").hide();
+		//reset all fields
+		//simple		
+			//reset event type
+			$('#eventType1').hide();
+			$('#eventType1').html("Type: ");	
+			//reset textbox
+			//$('#eventTypeValue1').hide();
+			//$('#eventTypeValue1').attr('value',"Event value");
+		//aggregate
+			$('#eventType2').hide();
+			$('#eventType2').html("Type: ");	
+			//reset textbox
+			//$('#eventTypeValue2').hide();
+			//$('#eventTypeValue2').attr('value',"Event value");
+		//Composed
+			$('#eventType3').hide();
+			$('#eventType3').html("Type: ");
+			$('#eventType4').hide();
+			$('#eventType4').html("Type: ");
+			$('#eventType5').hide();
+			$('#eventType5').html("Type: ");	
+			//reset textbox
+			//$('#eventTypeValue3').hide();
+			//$('#eventTypeValue3').attr('value',"Event value");
+			//$('#eventTypeValue4').hide();
+			//$('#eventTypeValue4').attr('value',"Event value");
+			//$('#eventTypeValue5').hide();
+			//$('#eventTypeValue5').attr('value',"Event value");
+			
+		//hide partition when calculation type changes
+		$('.partitionSelection').hide();
+		$('#NonePartition').prop("checked",true);
+		$('#partitionOptions').css('display', 'none');
+		$('#partitionOptions').find('option:gt(0)').remove();
+		$('#partitionOptions').append('<option value="" disabled selected hidden>Select Partition ID</option>');
 		
 		$.ajax({
 			url : restAddress + 'proasense_hella/sensor/'
@@ -560,6 +618,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 				
 
 				$('.sensorBox').prop( "disabled", false );
+				$('#companyContext').prop( "disabled", false );
 			}
 		});
 	}
@@ -595,8 +654,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 		} else {
 			//add new kpi
 		
-		}
-		
+		}		
 		initializeTooltips();
 	}
 	// window.alert("screen 1 - OK 2");
@@ -649,6 +707,16 @@ this.changeTypeAndPartitionAsync = function(id) {
 				$('#numberSupport option[value="'+ el.number_support.toLowerCase() +'"]').prop('selected',true);
 				
 				$('#companyContext option[value="'+ el.company_context +'"]').prop('selected',true);
+				$.ajax({
+					url: restAddress + 'proasense_hella/sensor/'+el.company_context,
+					type: 'GET',
+					async: false,
+					success: function(data) {
+						$("#companyContext").prop( "disabled", false);
+						sensors = data;
+						screen1.loadSensors();
+					}
+				});
 				
 				var kpiFormula = {};
 				for (var j = 0; j < kpiFormulas.length; j++) {
@@ -720,15 +788,16 @@ this.changeTypeAndPartitionAsync = function(id) {
 						this.kpiSensor1();
 						
 						//choose the correspondent kpi 
+						$('#selectKpi1 option[value="'+ kpiFormula.term1_kpi_id +'"]').prop('selected',true);
 						
 					}
-										
-					if(sEnv.eventpartition != null)
-						showpartition = true;
+					if(sEnv != null)				
+						if(sEnv.eventpartition != null)
+							showpartition = true;
 					
 					break;
 				case 'composed':
-					
+												
 					if(kpiFormula.term1_sensor_id != null){
 						
 						//sensor based
@@ -744,7 +813,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 						//this.updateField('selectSensor1',sEnv.sensorname);
 						$('#selectSensor3 option[value="'+ sEnv.sensorid +'"]').prop('selected',true);
 						//get sensor properties
-						this.loadEventPropertiesAsync(3);
+						this.loadEventPropertiesSync(3);
 						//set event
 						$('#selectSensorEvent3').val(sEnv.eventname).prop('selected',true);
 						this.changeTypeAndPartitionAsync(3);					
@@ -755,10 +824,13 @@ this.changeTypeAndPartitionAsync = function(id) {
 						this.kpiSensor();
 						
 						//choose the correspondent kpi 
-						
+						$('#selectKpi2 option[value="'+ kpiFormula.term1_kpi_id +'"]').prop('selected',true);
 					}
 					
-					$('#op1 option[value="'+ kpiFormula.operator_1 +'"]').prop('selected',true);
+					if(kpiFormula.operator_1.length == 1)
+						$('#op1 option:contains("'+ kpiFormula.operator_1 +'")').prop('selected',true);
+					else
+						$('#op1 option[value="'+ kpiFormula.operator_1 +'"]').prop('selected',true);
 					
 					if(kpiFormula.term2_sensor_id != null){
 						
@@ -768,7 +840,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 						//get sensor configurations
 						var sEnv = {};
 						for(var idx = 0 ; idx < sensorEvents.length ; idx++)
-							if(sensorEvents[idx].id == kpiFormula.term1_sensor_id){
+							if(sensorEvents[idx].id == kpiFormula.term2_sensor_id){
 								sEnv = sensorEvents[idx];
 								break;
 						}
@@ -776,22 +848,24 @@ this.changeTypeAndPartitionAsync = function(id) {
 						//this.updateField('selectSensor1',sEnv.sensorname);
 						$('#selectSensor4 option[value="'+ sEnv.sensorid +'"]').prop('selected',true);
 						//get sensor properties
-						this.loadEventPropertiesAsync(4);
+						this.loadEventPropertiesSync(4);
 						//set event
 						$('#selectSensorEvent4').val(sEnv.eventname).prop('selected',true);
 						this.changeTypeAndPartitionAsync(4);					
 						//this.updateField('eventTypeValue2', sEnv.eventtypevalue);
 					}else{
 						//kpi based
-						$('#kpiSensor4 option[value="kpi"]').prop('selected',true);
+						$('#kpiSensor3 option[value="kpi"]').prop('selected',true);
 						this.kpiSensor();
 						
-						//choose the correspondent kpi 
+						//choose the correspondent kpi
+						$('#selectKpi3 option[value="'+ kpiFormula.term2_kpi_id +'"]').prop('selected',true);
 						
 					}
-										
-					if(sEnv.eventpartition != null)
-						showpartition = true;
+					
+					if(sEnv != null)
+						if(sEnv.eventpartition != null)
+							showpartition = true;
 					
 					break;
 				default:
@@ -899,13 +973,18 @@ this.changeTypeAndPartitionAsync = function(id) {
 		var kpiFormulaIndex = "";
 		var kpiFormulaId = {};
 		var sensorKpi = {};
+		var sensorKpi2 = {};
 		var kpiInformation = {};
 		
 		if (loadedKpi != "") {
 			
+			$('html').block({
+				'message' : null
+			});
+			
 			for (var i = 0; i < kpiInfo.length; i++) {
 				if (kpiInfo[i].id == loadedKpi) {
-					kpi = kpiInfo[i]
+					kpi = $.extend( {}, kpiInfo[i]);
 					kpiIndex = i;
 					break;
 				}
@@ -913,7 +992,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 			
 			for (var i = 0; i < kpiFormulas.length; i++) {
 				if (kpiFormulas[i].kpi_id == loadedKpi) {
-					kpiFormula = kpiFormulas[i];
+					kpiFormula = $.extend( {}, kpiFormulas[i]);
 					kpiFormulaIndex = i;
 					break;
 				}
@@ -925,7 +1004,9 @@ this.changeTypeAndPartitionAsync = function(id) {
 			kpi.calculation_type = $('#calculationType').val();
 			kpi.sampling_rate = parseInt($('#samplingRate').val());
 			kpi.sampling_interval = $('#samplingInterval').val();
-
+			
+			var samplingRate = parseInt($('#samplingRate').val());
+			
 			var chk = $('#contextualInformation input');
 			kpi.context_product = chk[0].checked;
 			kpi.context_machine = chk[1].checked;
@@ -946,11 +1027,12 @@ this.changeTypeAndPartitionAsync = function(id) {
 				}
 			}
 			
-			kpi.number_support = $('#numberSupport').val();
+			kpi.number_support = $('#numberSupport').val().toUpperCase();
 
 			kpi.company_context = $('#companyContext').val();
 			
 			var senEnvIds2Delup = [];
+			var senEnvErrorUp = [];
 			
 			switch(kpi.calculation_type){
 			case "simple":
@@ -964,8 +1046,27 @@ this.changeTypeAndPartitionAsync = function(id) {
 				kpiFormula.term2_sensor_id = null;
 				
 				sensorIDvalue = $('#selectSensor1').find(":selected").attr("value");
+				eventNAMEvalue = $('#selectSensorEvent1').find(":selected").attr("value");
 				
-				if(kpiFormula.term1_sensor_id != sensorIDvalue){	
+				if(sensorIDvalue == null){
+					$.notify('Choose a sensor');
+					return;
+				}
+				if(eventNAMEvalue == null){
+					$.notify('Choose an event');
+					return;
+				}
+				
+				var SensorID = null;
+				var EventName = null;
+				for(var idx = 0 ; idx < sensorEvents.length ; idx++)
+					if(sensorEvents[idx].id == kpiFormula.term1_sensor_id){
+						SensorID = sensorEvents[idx].sensorid;
+						EventName = sensorEvents[idx].eventname;
+						break;
+					}
+				
+				if(SensorID != sensorIDvalue || (SensorID == sensorIDvalue && EventName != eventNAMEvalue)){	
 
 					if(kpiFormula.term1_sensor_id != null)	
 						senEnvIds2Delup.push(kpiFormula.term1_sensor_id);
@@ -974,7 +1075,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 					sensorKpi.sensorname = $('#selectSensor1').find(":selected").text();
 					sensorKpi.eventname = $('#selectSensorEvent1').find(":selected").text();
 					sensorKpi.eventtype = $('#selectSensorEvent1').find(":selected").attr("type");
-					sensorKpi.eventtypevalue = $('#eventTypeValue1').val();
+					//sensorKpi.eventtypevalue = $('#eventTypeValue1').val();
 					sensorKpi.eventpartition = $('#selectSensorEvent1').find(":selected").attr("partition");
 					if(sensorKpi.eventpartition == "true")
 						sensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
@@ -999,8 +1100,8 @@ this.changeTypeAndPartitionAsync = function(id) {
 								
 								kpiFormula.term1_sensor_id = result.insertId[0];
 								sensorKpi.id = result.insertId[0];
-								//add to local	
-								sensorEvents.push(sensorKpi);
+								
+								senEnvErrorUp.push(sensorKpi);
 							}
 							else{
 								$.notify('Error adding sensor 1');
@@ -1024,8 +1125,27 @@ this.changeTypeAndPartitionAsync = function(id) {
 					kpiFormula.term1_kpi_id = null;
 					
 					sensorIDvalue = $('#selectSensor2').find(":selected").attr("value");
+					eventNAMEvalue = $('#selectSensorEvent2').find(":selected").attr("value");
+										
+					if(sensorIDvalue == null){
+						$.notify('Choose a sensor');
+						return;
+					}
+					if(eventNAMEvalue == null){
+						$.notify('Choose an event');
+						return;
+					}
 					
-					if(kpiFormula.term1_sensor_id != sensorIDvalue){	
+//					var SensorID = null;
+//					var EventName = null;
+//					for(var idx = 0 ; idx < sensorEvents.length ; idx++)
+//						if(sensorEvents[idx].id == kpiFormula.term1_sensor_id ){
+//							SensorID = sensorEvents[idx].sensorid;
+//							EventName = sensorEvents[idx].eventname;
+//							break;
+//						}
+//
+//					if(SensorID != sensorIDvalue || (SensorID == sensorIDvalue && EventName != eventNAMEvalue)){	
 
 						if(kpiFormula.term1_sensor_id != null)		
 							senEnvIds2Delup.push(kpiFormula.term1_sensor_id);
@@ -1034,7 +1154,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 						sensorKpi.sensorname = $('#selectSensor2').find(":selected").text();
 						sensorKpi.eventname = $('#selectSensorEvent2').find(":selected").text();
 						sensorKpi.eventtype = $('#selectSensorEvent2').find(":selected").attr("type");
-						sensorKpi.eventtypevalue = $('#eventTypeValue2').val();
+						//sensorKpi.eventtypevalue = $('#eventTypeValue2').val();
 						sensorKpi.eventpartition = $('#selectSensorEvent2').find(":selected").attr("partition");
 						if(sensorKpi.eventpartition == "true")
 							sensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
@@ -1059,8 +1179,8 @@ this.changeTypeAndPartitionAsync = function(id) {
 									
 									kpiFormula.term1_sensor_id = result.insertId[0];
 									sensorKpi.id = result.insertId[0];
-									//add to local	
-									sensorEvents.push(sensorKpi);
+
+									senEnvErrorUp.push(sensorKpi);
 								}
 								else{
 									$.notify('Error adding sensor 1');
@@ -1068,7 +1188,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 								}
 							}
 						});
-					}
+					//}
 					
 				}
 				else{
@@ -1089,16 +1209,36 @@ this.changeTypeAndPartitionAsync = function(id) {
 	
 				kpiFormula.operator_1 = $('#op1').val();
 				kpiInformation.operator1 = kpiFormula.operator_1;
-
+				
 				if($('#kpiSensor2').val() == 'sensor'){
-					
+										
 					kpiFormula.term1_kpi_id = null;
 					
-					sensorIDvalue = $('#selectSensor3').find(":selected").attr("value");
+					var sensorIDvalue = $('#selectSensor3').find(":selected").attr("value");
+					var eventNAMEvalue = $('#selectSensorEvent3').find(":selected").attr("value");
 					
-					if(kpiFormula.term1_sensor_id != sensorIDvalue){	
-										
-
+					if($('#selectSensorEvent3').find(":selected").attr("partition") == "true")
+						partitionIDvalue = $('#partitionOptions').find(":selected").attr("value");
+					
+					if(sensorIDvalue == null){
+						$.notify('Choose a sensor');
+						return;
+					}
+					if(eventNAMEvalue == null){
+						$.notify('Choose an event');
+						return;
+					}
+					
+//					var sensorEventOLD = {};	
+//					
+//					for(var idx = 0 ; idx < sensorEvents.length ; idx++)
+//						if(sensorEvents[idx].id == kpiFormula.term1_sensor_id ){
+//							sensorEventOLD = $.extend( {}, sensorEvents[idx]);
+//							break;
+//						}
+//					
+//					if(sensorEventOLD.sensorid != sensorIDvalue || (sensorEventOLD.sensorid == sensorIDvalue && sensorEventOLD.eventname != eventNAMEvalue)){	
+						
 						if(kpiFormula.term1_sensor_id != null)
 							senEnvIds2Delup.push(kpiFormula.term1_sensor_id);
 
@@ -1106,7 +1246,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 						sensorKpi.sensorname = $('#selectSensor3').find(":selected").text();
 						sensorKpi.eventname = $('#selectSensorEvent3').find(":selected").text();
 						sensorKpi.eventtype = $('#selectSensorEvent3').find(":selected").attr("type");
-						sensorKpi.eventtypevalue = $('#eventTypeValue3').val();
+						//sensorKpi.eventtypevalue = $('#eventTypeValue3').val();
 						sensorKpi.eventpartition = $('#selectSensorEvent3').find(":selected").attr("partition");
 						if(sensorKpi.eventpartition == "true")
 							sensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
@@ -1114,6 +1254,13 @@ this.changeTypeAndPartitionAsync = function(id) {
 							sensorKpi.partitionid = "none";
 						sensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
 						sensorKpi.sampling_interval = $('#samplingInterval').val();
+						
+						kpiInformation.sensorid1 = sensorKpi.sensorid;
+						kpiInformation.sensorname1 = sensorKpi.sensorname;
+						kpiInformation.eventname1 = sensorKpi.eventname;
+						kpiInformation.eventtype1 = sensorKpi.eventtype;
+						kpiInformation.eventpartition1 = sensorKpi.eventpartition;
+						kpiInformation.partitionid1 = sensorKpi.partitionid;
 						
 						
 						$.ajax({
@@ -1126,13 +1273,12 @@ this.changeTypeAndPartitionAsync = function(id) {
 											.stringify(sensorKpi)
 									+ ']}',
 							success : function(result) {
-								$('html').unblock();
 								if (result.succeeded) {
 									
 									kpiFormula.term1_sensor_id = result.insertId[0];
 									sensorKpi.id = result.insertId[0];
-									//add to local	
-									sensorEvents.push(sensorKpi);
+
+									senEnvErrorUp.push(sensorKpi);
 								}
 								else{
 									$.notify('Error adding sensor 1');
@@ -1140,10 +1286,16 @@ this.changeTypeAndPartitionAsync = function(id) {
 								}
 							}
 						});
-					}
-					
-					
-					
+//					}else{
+//						
+//						kpiInformation.sensorid1 = sensorEventOLD.sensorid;
+//						kpiInformation.sensorname1 = sensorEventOLD.sensorname;
+//						kpiInformation.eventname1 = sensorEventOLD.eventname;
+//						kpiInformation.eventtype1 = sensorEventOLD.eventtype;
+//						kpiInformation.eventpartition1 = sensorEventOLD.eventpartition;
+//						kpiInformation.partitionid1 = sensorEventOLD.partitionid;						
+//					}
+										
 				}
 				else{
 					
@@ -1161,28 +1313,50 @@ this.changeTypeAndPartitionAsync = function(id) {
 					
 					kpiFormula.term2_kpi_id = null;
 					
-					sensorIDvalue = $('#selectSensor4').find(":selected").attr("value");
+					var sensorIDvalue1 = $('#selectSensor4').attr("value");
+					var eventNAMEvalue1 = $('#selectSensorEvent4').attr("value");
+					if(sensorIDvalue1 == null){
+						$.notify('Choose a sensor');
+						return;
+					}
+					if(eventNAMEvalue1 == null){
+						$.notify('Choose an event');
+						return;
+					}
 					
-					if(kpiFormula.term2_sensor_id != sensorIDvalue){	
-										
+//					var sensorEventOLD1 = {};
+//					
+//					for(var idx2 = 0 ; idx2 < sensorEvents.length ; idx2++)
+//						if(sensorEvents[idx2].id == kpiFormula.term2_sensor_id ){
+//							sensorEventOLD1 = $.extend( {}, sensorEvents[idx2]);
+//							break;
+//						}
+//					
+//					if(sensorEventOLD1.sensorid != sensorIDvalue1 || (sensorEventOLD1.sensorid == sensorIDvalue1 && sensorEventOLD1.eventname != eventNAMEvalue1)){	
+						
 						if(kpiFormula.term2_sensor_id != null)
 							senEnvIds2Delup.push(kpiFormula.term2_sensor_id);
-
-						delete sensorKpi.id;
 						
-						sensorKpi.sensorid = $('#selectSensor4').find(":selected").attr("value");
-						sensorKpi.sensorname = $('#selectSensor4').find(":selected").text();
-						sensorKpi.eventname = $('#selectSensorEvent4').find(":selected").text();
-						sensorKpi.eventtype = $('#selectSensorEvent4').find(":selected").attr("type");
-						sensorKpi.eventtypevalue = $('#eventTypeValue4').val();
-						sensorKpi.eventpartition = $('#selectSensorEvent4').find(":selected").attr("partition");
-						if(sensorKpi.eventpartition == "true")
-							sensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
+						sensorKpi2.sensorid = $('#selectSensor4').find(":selected").attr("value");
+						sensorKpi2.sensorname = $('#selectSensor4').find(":selected").text();
+						sensorKpi2.eventname = $('#selectSensorEvent4').find(":selected").text();
+						sensorKpi2.eventtype = $('#selectSensorEvent4').find(":selected").attr("type");
+						//sensorKpi2.eventtypevalue = $('#eventTypeValue4').val();
+						sensorKpi2.eventpartition = $('#selectSensorEvent4').find(":selected").attr("partition");
+						if(sensorKpi2.eventpartition == "true")
+							sensorKpi2.partitionid = $('#partitionOptions').find(":selected").attr("value");
 						else
-							sensorKpi.partitionid = "none";
-						sensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
-						sensorKpi.sampling_interval = $('#samplingInterval').val();
-						
+							sensorKpi2.partitionid = "none";
+												
+						sensorKpi2.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
+						sensorKpi2.sampling_interval = $('#samplingInterval').val();
+
+						kpiInformation.sensorid2 = sensorKpi2.sensorid;
+						kpiInformation.sensorname2 = sensorKpi2.sensorname;
+						kpiInformation.eventname2 = sensorKpi2.eventname;
+						kpiInformation.eventtype2 = sensorKpi2.eventtype;
+						kpiInformation.eventpartition2 = sensorKpi2.eventpartition;
+						kpiInformation.partitionid2 = sensorKpi2.partitionid;
 						
 						$.ajax({
 							url : restAddress
@@ -1191,16 +1365,15 @@ this.changeTypeAndPartitionAsync = function(id) {
 							async: false ,
 							data : '{"type":"INSERT","data":['
 									+ JSON
-											.stringify(sensorKpi)
+											.stringify(sensorKpi2)
 									+ ']}',
 							success : function(result) {
-								$('html').unblock();
 								if (result.succeeded) {
 									
 									kpiFormula.term2_sensor_id = result.insertId[0];
-									sensorKpi.id = result.insertId[0];
-									//add to local	
-									sensorEvents.push(sensorKpi);
+									sensorKpi2.id = result.insertId[0];
+
+									senEnvErrorUp.push(sensorKpi2);
 								}
 								else{
 									$.notify('Error adding sensor 2');
@@ -1208,7 +1381,15 @@ this.changeTypeAndPartitionAsync = function(id) {
 								}
 							}
 						});
-					}
+//					}else{
+//						kpiInformation.sensorid2 = sensorEventOLD1.sensorid;
+//						kpiInformation.sensorname2 = sensorEventOLD1.sensorname;
+//						kpiInformation.eventname2 = sensorEventOLD1.eventname;
+//						kpiInformation.eventtype2 = sensorEventOLD1.eventtype;
+//						kpiInformation.eventpartition2 = sensorEventOLD1.eventpartition;
+//						kpiInformation.partitionid2 = sensorEventOLD1.partitionid;	
+//						
+//					}
 					
 				}
 				else{
@@ -1229,102 +1410,126 @@ this.changeTypeAndPartitionAsync = function(id) {
 			
 			}
 			
-			$('html').block({
-				'message' : null
-			});
-			
 			//merge kpi and sensor information
-			$.extend(kpiInformation, sensorKpi , kpi);
+			$.extend(kpiInformation, kpiInformation , kpi);
 			
 			//inform the storage of the new kpi
 			$.ajax({
 				url : restAddress
 						+ 'proasense_hella/update',
 				type : 'POST',
-				async : false,
 				data : '{"type":"INFORM","data":['
 						+ JSON
 								.stringify(kpiInformation)
 						+ ']}',
 				success : function(result){
-					if(result.suceeded){
+					if(result.succeeded){
 						
+						for(var i = 0; i < senEnvErrorUp.length; i++){
+							sensorEvents.push(senEnvErrorUp[i]);
+						}			
+						
+						$.ajax({
+							url : restAddress + 'proasense_hella/kpi_formula',
+							type : 'POST',
+							async: false,
+							data : '{"type":"UPDATE","data":' + JSON.stringify(kpiFormula)
+									+ '}',
+							success : function(result) {
+
+								if (result.succeeded) {
+									
+									var tmpObj = jQuery.extend({}, kpi);
+									delete tmpObj.parent_id;
+									delete tmpObj.text;
+									delete tmpObj.children;
+									$.ajax({
+										url : restAddress + 'proasense_hella/kpi',
+										type : 'POST',
+										data : '{"type":"UPDATE","data":'
+												+ JSON.stringify(tmpObj) + '}',
+										success : function(result) {
+											$('html').unblock();
+
+											if (result.succeeded) {
+																				
+												$.notify('KPI updated', 'success');
+												kpiInfo[kpiIndex] = kpi;
+												kpiFormulas[kpiFormulaIndex] = kpiFormula;
+												$('#KPITree').jstree().rename_node(kpi.id,
+														kpi.text);
+												activeScreen.closeScreen();
+												
+												for(var i = 0; i < senEnvIds2Delup.length; i++){
+													
+													for(var idx = 0 ; idx < sensorEvents.length ; idx++)
+														if(sensorEvents[idx].id == senEnvIds2Delup[i]){
+															
+															sensorEvents.splice(idx,1);
+															break;
+														}
+																						
+													$.ajax({
+														url: restAddress + 'proasense_hella/sensorevent',
+														type: 'POST',
+														async: false,
+														data: '{"type":"DELETE","data":[{"id":' + senEnvIds2Delup[i] + '}]}',
+														success: function(result) {
+
+															if (result.succeeded) {
+																
+																
+															}else{
+																$('html').unblock();
+																$.notify('Error deleting sensor events');
+																return;
+															}
+														}
+															
+													});
+												}
+												
+											} else {
+												$.notify('KPI update failed');
+											}
+										}
+									});
+								} else {
+									$('html').unblock();
+									$.notify('Formula update failed');
+								}		
+							}
+						});		
 					}
 					else{
+						
+						for(var i = 0; i < senEnvErrorUp.length; i++){
+						
+							$.ajax({
+								url: restAddress + 'proasense_hella/sensorevent',
+								type: 'POST',
+								data: '{"type":"DELETE","data":[{"id":' + senEnvErrorUp[i].id + '}]}',
+								success: function(result) {
+
+									if (result.succeeded) {
+										
+											
+									}else{
+										$('html').unblock();
+										$.notify('Error deleting sensor events');
+										return;
+									}
+								}
+									
+							});
+						}
+						
 						$('html').unblock();
 						$.notify('KPI update failed due to storage');
 						return;
 					}
 				}
 			});
-			
-			$.ajax({
-				url : restAddress + 'proasense_hella/kpi_formula',
-				type : 'POST',
-				data : '{"type":"UPDATE","data":' + JSON.stringify(kpiFormula)
-						+ '}',
-				success : function(result) {
-
-					if (result.succeeded) {
-						var tmpObj = jQuery.extend({}, kpi);
-						delete tmpObj.parent_id;
-						delete tmpObj.text;
-						delete tmpObj.children;
-						$.ajax({
-							url : restAddress + 'proasense_hella/kpi',
-							type : 'POST',
-							data : '{"type":"UPDATE","data":'
-									+ JSON.stringify(tmpObj) + '}',
-							success : function(result) {
-								$('html').unblock();
-
-								if (result.succeeded) {
-																											
-									$.notify('KPI updated', 'success');
-									kpiInfo[kpiIndex] = kpi;
-									kpiFormulas[kpiFormulaIndex] = kpiFormula;
-									$('#KPITree').jstree().rename_node(kpi.id,
-											kpi.text);
-									activeScreen.closeScreen();
-								} else {
-									$.notify('KPI update failed');
-								}
-							}
-						});
-					} else {
-						$('html').unblock();
-						$.notify('Formula update failed');
-					}
-					
-					
-					for(var i = 0; i < senEnvIds2Delup.length; i++){
-						
-						for(var idx = 0 ; idx < sensorEvents.length ; idx++)
-							if(sensorEvents[idx].id == senEnvIds2Delup[i]){
-								sensorEvents.splice(idx,1);
-								break;
-							}
-						
-						$.ajax({
-							url: restAddress + 'proasense_hella/sensorevent',
-							type: 'POST',
-							data: '{"type":"DELETE","data":[{"id":' + senEnvIds2Delup[i] + '}]}',
-							async: false,
-							success: function(result) {
-
-								if (result.succeeded) {
-									
-								}else{
-									$('html').unblock();
-									$.notify('Error deleting sensor events');
-									return;
-								}
-							}
-								
-						});
-					}		
-				}
-			});			
 		} else {
 			if (($('#calculationType').val() != null)
 					&& ($('#numberSupport').val() != null)
@@ -1336,6 +1541,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 				var newKpi = {};
 				var newKpiFormula = {};
 				var newsensorKpi = {};
+				var newsensorKpi2 = {};
 				var kpiusage = {};
 				var newkpiInformation = {};
 				var sensor1 = false, sensor2 = false, sensor3 = false;
@@ -1388,8 +1594,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 				$('html').block({
 					'message' : null
 				});
-				$
-						.ajax({
+				$.ajax({
 							url : restAddress + 'proasense_hella/kpi',
 							type : 'POST',
 							data : '{"type":"INSERT","data":['
@@ -1427,7 +1632,6 @@ this.changeTypeAndPartitionAsync = function(id) {
 															.stringify(newsensorKpi)
 													+ ']}',
 											success : function(result) {
-												$('html').unblock();
 												if (result.succeeded) {
 													
 													newKpiFormula.term1_sensor_id = result.insertId[0];
@@ -1448,7 +1652,7 @@ this.changeTypeAndPartitionAsync = function(id) {
 																		//merge kpi and sensor information
 																		$.extend(newkpiInformation, newsensorKpi, newKpi);
 																		
-																		console.log(newkpiInformation);
+																		newKpiFormula.id = result.insertId[0];
 																		
 																		//inform the storage of the new kpi
 																		$.ajax({
@@ -1459,9 +1663,10 @@ this.changeTypeAndPartitionAsync = function(id) {
 																					+ JSON
 																							.stringify(newkpiInformation)
 																					+ ']}',
-																			success : function(result) {
+																			success : function(result2) {
 																				$('html').unblock();
-																				if (result.succeeded) {
+																				if (result2.succeeded) {
+																					
 																					$.notify('KPI added',
 																							'success');
 																					newKpi.children = [];
@@ -1472,10 +1677,9 @@ this.changeTypeAndPartitionAsync = function(id) {
 																							break;
 																						}
 																					}
-																					newKpiFormula.id = result.insertId[0];
+																					
 																					kpiInfo.push(newKpi);
-																					kpiFormulas
-																							.push(newKpiFormula);
+																					kpiFormulas.push(newKpiFormula);
 																					sensorEvents.push(newsensorKpi);
 																					newKpi.text = newKpi.name
 																							+ delEditBtn;
@@ -1487,11 +1691,32 @@ this.changeTypeAndPartitionAsync = function(id) {
 																											.extend(
 																													{},
 																													newKpi));
-																					screen1.closeScreen();
+																					
 																				}
 																				else{
+																					//erase db corrupt data
+																					$.ajax({
+																						url: restAddress + 'proasense_hella/kpi_formula',
+																						type: 'POST',
+																						async: false,
+																						data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.id + '}]}',
+																						});
+																					$.ajax({
+																						url: restAddress + 'proasense_hella/kpi',
+																						type: 'POST',
+																						data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
+																						});
+																					$.ajax({
+																						url: restAddress + 'proasense_hella/sensorevent',
+																						type: 'POST',
+																						data: '{"type":"DELETE","data":[{"id":' + newsensorKpi.id + '}]}',
+																						});
+
+																					$('html').unblock();
 																					$.notify('Error adding kpi in storage');
 																				}
+																				
+																				screen1.closeScreen();
 																			}
 																		});
 
@@ -1506,6 +1731,8 @@ this.changeTypeAndPartitionAsync = function(id) {
 																			type: 'POST',
 																			data: '{"type":"DELETE","data":[{"id":' + newsensorKpi.term1_sensor_id + '}]}',
 																			});
+
+																		$('html').unblock();
 																		$.notify('Error adding formula');
 																	}
 																}
@@ -1517,6 +1744,8 @@ this.changeTypeAndPartitionAsync = function(id) {
 														type: 'POST',
 														data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
 														});
+
+													$('html').unblock();
 													$.notify('Error adding sensor event');
 												}
 											}
@@ -1552,7 +1781,6 @@ this.changeTypeAndPartitionAsync = function(id) {
 																.stringify(newsensorKpi)
 														+ ']}',
 												success : function(result) {
-													$('html').unblock();
 													if (result.succeeded) {
 														
 														newKpiFormula.term1_sensor_id = result.insertId[0];
@@ -1564,6 +1792,8 @@ this.changeTypeAndPartitionAsync = function(id) {
 															type: 'POST',
 															data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
 															});
+
+														$('html').unblock();
 														$.notify('Error adding sensor');
 													}
 												}
@@ -1588,14 +1818,17 @@ this.changeTypeAndPartitionAsync = function(id) {
 																.stringify(newKpiFormula)
 														+ ']}',
 												success : function(result) {
-													$('html').unblock();
 													if (result.succeeded) {
+														
+
+														newKpiFormula.id = result.insertId[0];
 														
 														//merge kpi and sensor information
 														if(sensor1)
 															$.extend(newkpiInformation, newsensorKpi , newKpi);
 														else
 															$.extend(newkpiInformation, kpiusage , newKpi);
+														
 														//inform the storage of the new kpi
 														$.ajax({
 															url : restAddress
@@ -1605,46 +1838,81 @@ this.changeTypeAndPartitionAsync = function(id) {
 																	+ JSON
 																			.stringify(newkpiInformation)
 																	+ ']}',
+																	success : function(result2) {
+																		
+																		$('html').unblock();
+																		
+																		if (result2.succeeded) {
+																			
+																			$.notify('KPI added',
+																			'success');
+																			newKpi.children = [];
+																			for (var i = 0; i < kpiInfo.length; i++) {
+																				if (kpiInfo[i].id == newParentId) {
+																					kpiInfo[i].children
+																							.push(newKpi);
+																					break;
+																				}
+																			}
+																			
+																			kpiInfo.push(newKpi);
+																			kpiFormulas.push(newKpiFormula);
+																			if(sensor1)
+																				sensorEvents.push(newsensorKpi);
+																			newKpi.text = newKpi.name
+																					+ delEditBtn;
+																			$('#KPITree')
+																					.jstree()
+																					.create_node(
+																							newParentId,
+																							jQuery
+																									.extend(
+																											{},
+																											newKpi));
+																			
+																		}else{
+																			//erase db corrupt data
+																			$.ajax({
+																				url: restAddress + 'proasense_hella/kpi_formula',
+																				type: 'POST',
+																				async: false,
+																				data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.id + '}]}',
+																				});
+																			$.ajax({
+																				url: restAddress + 'proasense_hella/kpi',
+																				type: 'POST',
+																				data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
+																				});
+																			if(sensor1)
+																				$.ajax({
+																					url: restAddress + 'proasense_hella/sensorevent',
+																					type: 'POST',
+																					data: '{"type":"DELETE","data":[{"id":' + newsensorKpi.id + '}]}',
+																					});
+
+																			$('html').unblock();
+																			$.notify('Error adding kpi in storage');
+																			
+																		}
+																		
+																		screen1.closeScreen();
+																	}
 														});
 														
-														$.notify('KPI added',
-																'success');
-														newKpi.children = [];
-														for (var i = 0; i < kpiInfo.length; i++) {
-															if (kpiInfo[i].id == newParentId) {
-																kpiInfo[i].children
-																		.push(newKpi);
-																break;
-															}
-														}
-														newKpiFormula.id = result.insertId[0];
-														kpiInfo.push(newKpi);
-														kpiFormulas
-																.push(newKpiFormula);
-														if(sensor1)
-															sensorEvents.push(newsensorKpi);
-														newKpi.text = newKpi.name
-																+ delEditBtn;
-														$('#KPITree')
-																.jstree()
-																.create_node(
-																		newParentId,
-																		jQuery
-																				.extend(
-																						{},
-																						newKpi));
-														screen1.closeScreen();
 													} else {
 														$.ajax({
 															url: restAddress + 'proasense_hella/kpi',
 															type: 'POST',
 															data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
 															});
-														$.ajax({
-															url: restAddress + 'proasense_hella/sensorevent',
-															type: 'POST',
-															data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
-															});
+														if(sensor1)
+															$.ajax({
+																url: restAddress + 'proasense_hella/sensorevent',
+																type: 'POST',
+																data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
+																});
+
+														$('html').unblock();
 														$.notify('Error adding formula');
 													}
 												}
@@ -1653,19 +1921,15 @@ this.changeTypeAndPartitionAsync = function(id) {
 												
 										break;
 									case "composed":
-										
-										/*
-										if(true){
-											$.notify('Not Supported yet');
-											return;
-										}*/
-										
+																				
 										sensor1 = $('#kpiSensor2').val() == 'sensor';
 										sensor2 = $('#kpiSensor3').val() == 'sensor';
 										//sensor3 = $('#kpiSensor4').val() == 'sensor';
 
 										newsensorKpi.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
 										newsensorKpi.sampling_interval = $('#samplingInterval').val();
+										newsensorKpi2.sampling_rate = isNaN(samplingRate) ? 0 : samplingRate;
+										newsensorKpi2.sampling_interval = $('#samplingInterval').val();
 										
 										newKpiFormula.operator_1 = $('#op1').val();
 										newkpiInformation.operator1 = newKpiFormula.operator_1;
@@ -1708,7 +1972,6 @@ this.changeTypeAndPartitionAsync = function(id) {
 															.stringify(newsensorKpi)
 													+ ']}',
 											success : function(result) {
-												$('html').unblock();
 												if (result.succeeded) {
 													
 													if(sensor1){
@@ -1728,26 +1991,24 @@ this.changeTypeAndPartitionAsync = function(id) {
 										
 										if(sensor2){
 											
-											delete newsensorKpi.id;
-											
 											//info to integrate with dominik model
-											newsensorKpi.sensorid = $('#selectSensor4').find(":selected").attr("value");
-											newsensorKpi.sensorname = $('#selectSensor4').find(":selected").text();
-											newsensorKpi.eventname = $('#selectSensorEvent4').find(":selected").text();
-											newsensorKpi.eventtype = $('#selectSensorEvent4').find(":selected").attr("type");
-											newsensorKpi.eventtypevalue = $('#eventTypeValue4').val();
-											newsensorKpi.eventpartition = $('#selectSensorEvent4').find(":selected").attr("partition");
-											if(newsensorKpi.eventpartition == "true")
-												newsensorKpi.partitionid = $('#partitionOptions').find(":selected").attr("value");
+											newsensorKpi2.sensorid = $('#selectSensor4').find(":selected").attr("value");
+											newsensorKpi2.sensorname = $('#selectSensor4').find(":selected").text();
+											newsensorKpi2.eventname = $('#selectSensorEvent4').find(":selected").text();
+											newsensorKpi2.eventtype = $('#selectSensorEvent4').find(":selected").attr("type");
+											newsensorKpi2.eventtypevalue = $('#eventTypeValue4').val();
+											newsensorKpi2.eventpartition = $('#selectSensorEvent4').find(":selected").attr("partition");
+											if(newsensorKpi2.eventpartition == "true")
+												newsensorKpi2.partitionid = $('#partitionOptions').find(":selected").attr("value");
 											else
-												newsensorKpi.partitionid = "none";
+												newsensorKpi2.partitionid = "none";
 											
-											newkpiInformation.sensorid2 = newsensorKpi.sensorid;
-											newkpiInformation.sensorname2 = newsensorKpi.sensorname;
-											newkpiInformation.eventname2 = newsensorKpi.eventname;
-											newkpiInformation.eventtype2 = newsensorKpi.eventtype;
-											newkpiInformation.eventpartition2 = newsensorKpi.eventpartition;
-											newkpiInformation.partitionid2 = newsensorKpi.partitionid;
+											newkpiInformation.sensorid2 = newsensorKpi2.sensorid;
+											newkpiInformation.sensorname2 = newsensorKpi2.sensorname;
+											newkpiInformation.eventname2 = newsensorKpi2.eventname;
+											newkpiInformation.eventtype2 = newsensorKpi2.eventtype;
+											newkpiInformation.eventpartition2 = newsensorKpi2.eventpartition;
+											newkpiInformation.partitionid2 = newsensorKpi2.partitionid;
 																						
 										}
 										else{
@@ -1762,16 +2023,15 @@ this.changeTypeAndPartitionAsync = function(id) {
 											async: false ,
 											data : '{"type":"INSERT","data":['
 													+ JSON
-															.stringify(newsensorKpi)
+															.stringify(newsensorKpi2)
 													+ ']}',
 											success : function(result) {
-												$('html').unblock();
 												if (result.succeeded) {
 													if(sensor2){
 														newKpiFormula.term2_sensor_id = result.insertId[0];
-														newsensorKpi.id = result.insertId[0];
+														newsensorKpi2.id = result.insertId[0];
 														//add to local	
-														sensorEvents.push(newsensorKpi);
+														sensorEvents.push(newsensorKpi2);
 													}else
 														newKpiFormula.term2_kpi_id = result.insertId[0];
 												}
@@ -1791,14 +2051,14 @@ this.changeTypeAndPartitionAsync = function(id) {
 														+ JSON
 																.stringify(newKpiFormula)
 														+ ']}',
-												success : function(result) {
-													$('html').unblock();
+												success : function(result) {													
+													
 													if (result.succeeded) {
 														
 														//merge kpi and sensor information
 														$.extend(newkpiInformation, newkpiInformation , newKpi);
 														
-														console.log(newkpiInformation);
+														newKpiFormula.id = result.insertId[0];
 														
 														//inform the storage of the new kpi
 														$.ajax({
@@ -1809,33 +2069,72 @@ this.changeTypeAndPartitionAsync = function(id) {
 																	+ JSON
 																			.stringify(newkpiInformation)
 																	+ ']}',
+																	success : function(result2) {
+																		
+																		$('html').unblock();
+																		
+																		if (result2.succeeded) {
+																			
+																			$.notify('KPI added',
+																			'success');
+																			newKpi.children = [];
+																			for (var i = 0; i < kpiInfo.length; i++) {
+																				if (kpiInfo[i].id == newParentId) {
+																					kpiInfo[i].children
+																							.push(newKpi);
+																					break;
+																				}
+																			}
+																			kpiInfo.push(newKpi);
+																			kpiFormulas.push(newKpiFormula);
+																			
+																			newKpi.text = newKpi.name
+																					+ delEditBtn;
+																			$('#KPITree')
+																					.jstree()
+																					.create_node(
+																							newParentId,
+																							jQuery
+																									.extend(
+																											{},
+																											newKpi));
+																		}
+																		else{
+																			//erase db corrupt data
+																			$.ajax({
+																				url: restAddress + 'proasense_hella/kpi_formula',
+																				type: 'POST',
+																				async: false,
+																				data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.id + '}]}',
+																				});
+																			$.ajax({
+																				url: restAddress + 'proasense_hella/kpi',
+																				type: 'POST',
+																				data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
+																				});
+																			if(sensor1)
+																				$.ajax({
+																					url: restAddress + 'proasense_hella/sensorevent',
+																					type: 'POST',
+																					data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
+																					});
+																			if(sensor2)
+																				$.ajax({
+																					url: restAddress + 'proasense_hella/sensorevent',
+																					type: 'POST',
+																					data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term2_sensor_id + '}]}',
+																					});
+																			
+																			$.notify('Error adding kpi in storage');
+																			
+																		}
+																		
+																		screen1.closeScreen();
+																	}
 														});
 														
-														$.notify('KPI added',
-																'success');
-														newKpi.children = [];
-														for (var i = 0; i < kpiInfo.length; i++) {
-															if (kpiInfo[i].id == newParentId) {
-																kpiInfo[i].children
-																		.push(newKpi);
-																break;
-															}
-														}
-														newKpiFormula.id = result.insertId[0];
-														kpiInfo.push(newKpi);
-														kpiFormulas
-																.push(newKpiFormula);
-														
-														newKpi.text = newKpi.name
-																+ delEditBtn;
-														$('#KPITree')
-																.jstree()
-																.create_node(
-																		newParentId,
-																		jQuery
-																				.extend(
-																						{},
-																						newKpi));
+
+														$('html').unblock();
 														screen1.closeScreen();
 													} else {
 														//delete corrupt data
@@ -1844,16 +2143,20 @@ this.changeTypeAndPartitionAsync = function(id) {
 															type: 'POST',
 															data: '{"type":"DELETE","data":[{"id":' + newKpi.id + '}]}',
 															});
-														$.ajax({
-															url: restAddress + 'proasense_hella/sensorevent',
-															type: 'POST',
-															data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
-															});
-														$.ajax({
-															url: restAddress + 'proasense_hella/sensorevent',
-															type: 'POST',
-															data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term2_sensor_id + '}]}',
-															});
+														if(sensor1)
+															$.ajax({
+																url: restAddress + 'proasense_hella/sensorevent',
+																type: 'POST',
+																data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term1_sensor_id + '}]}',
+																});
+														if(sensor2)
+															$.ajax({
+																url: restAddress + 'proasense_hella/sensorevent',
+																type: 'POST',
+																data: '{"type":"DELETE","data":[{"id":' + newKpiFormula.term2_sensor_id + '}]}',
+																});
+
+														$('html').unblock();
 														$.notify('Error adding formula');
 													}
 												}
@@ -2016,7 +2319,7 @@ function Screen2(kpiInfo) {
 				}
 				
 				// Define number support format
-				showNumberSupportFormat(el.number_support_format);
+				//showNumberSupportFormat(el.number_support_format);
 //				window.alert(JSON.stringify(el));
 //				showNSFDecimalPlaces(el.nsf_decimal_places);
 				return true;
@@ -2052,7 +2355,7 @@ function Screen2(kpiInfo) {
 			var upValValidateNShow = "";
 			var lwValValidateNShow = "";
 			
-			var nZeros = numberOfZeros(kpiInfoTmp.nsf_decimal_places);
+			var nZeros = 4;//numberOfZeros(kpiInfoTmp.nsf_decimal_places);
 			
 //			var x2 = $('#upperBoundBoxDecimalPlaces').css('visibility');
 //			var x3  = $('#upperBoundBoxDecimalPlaces').css('display');
@@ -2062,14 +2365,14 @@ function Screen2(kpiInfo) {
 			} else {
 				upperValue = $('#upperBoundBox').val();
 				
-				if ( (kpiInfoTmp.nsf_decimal_places > 0) && (upperValue.indexOf(".") == -1) )
-					upperValue = $('#upperBoundBox').val() + "." + nZeros;
+//				if ( (kpiInfoTmp.nsf_decimal_places > 0) && (upperValue.indexOf(".") == -1) )
+//					upperValue = $('#upperBoundBox').val() + "." + nZeros;
 				
 				
 				if (kpiInfoTmp.number_support_format.toUpperCase()  == 'PERCENTAGE') {
 					upperValue = parseFloat((upperValue/100).toFixed(4));
 				} else if (kpiInfoTmp.number_support_format.toUpperCase()  == 'DECIMAL'){
-					upperValue = parseFloat((upperValue*1).toFixed(kpiInfoTmp.nsf_decimal_places));
+					upperValue = parseFloat((upperValue*1).toFixed(2));
 				}
 				upValValidateNShow = upperValue;
 			}
@@ -2079,13 +2382,13 @@ function Screen2(kpiInfo) {
 			} else {
 				lowerValue = $('#lowerBoundBox').val();
 
-				if ( (kpiInfoTmp.nsf_decimal_places > 0) && (lowerValue.indexOf(".") == -1) )
-					lowerValue = $('#lowerBoundBox').val() + "." + nZeros;
+//				if ( (kpiInfoTmp.nsf_decimal_places > 0) && (lowerValue.indexOf(".") == -1) )
+//					lowerValue = $('#lowerBoundBox').val() + "." + nZeros;
 
 				if (kpiInfoTmp.number_support_format.toUpperCase()  == 'PERCENTAGE') {
 					lowerValue=parseFloat((lowerValue/100).toFixed(4));
 				} else if (kpiInfoTmp.number_support_format.toUpperCase()  == 'DECIMAL'){
-					lowerValue = parseFloat((lowerValue*1).toFixed(kpiInfoTmp.nsf_decimal_places));
+					lowerValue = parseFloat((lowerValue*1).toFixed(2));
 				}
 				
 				lwValValidateNShow = lowerValue;
@@ -2098,7 +2401,7 @@ function Screen2(kpiInfo) {
 			
 //			console.log("loadedKPI: "+JSON.stringify(this.loadedKpi));
 
-			var validateInfo = validateNewTargetInputs(upValValidateNShow, lwValValidateNShow, loadedKpiNumberFormat, kpiInfoTmp.nsf_decimal_places, kpiInfoTmp.id, kpiInfoTmp);
+			var validateInfo = validateNewTargetInputs(upValValidateNShow, lwValValidateNShow, loadedKpiNumberFormat, nZeros, kpiInfoTmp.id, kpiInfoTmp);
 			if (validateInfo.isValid) {
 				$('html').block({
 					'message': null
@@ -2564,6 +2867,8 @@ function ScreenGraph(kpiInfo) {
 		this.startYear=(new Date(graphStartTime)).getFullYear();
 		var graphEndTime = $('#toDateChart').handleDtpicker('getDate').getTime();
 		var graphGranularity = $('#granularityChart').val();
+		var granularityID = $('#granularityChart').find(":selected").attr("id");
+		var enablePred = $('#predictionSwitch').is(":checked");
 		
 		var contextValueId = $('#context_select_list').val();
 		var contextValueIdStr = "";
@@ -2605,6 +2910,8 @@ function ScreenGraph(kpiInfo) {
 									"&startTime=" + graphStartTime + 
 									"&endTime=" + graphEndTime + 
 	 								"&granularity=" + graphGranularity + 
+	 								"&granularityID=" + granularityID + 
+	 							    "&withPrediction="+ enablePred+
 									contextValueIdStr +
 									secondContextValueStr +
 									includeGlobalStr,
@@ -2737,6 +3044,7 @@ function ScreenGraph(kpiInfo) {
 
 	this.openScreen = function(id) {
 		$('.content').html(this.content);
+		$('#predictionSwitch').bootstrapSwitch();
 		this.graphContextualInformation="Global";
 		this.graphGranularity = "monthly";
 		var radiosGraph = $('#graphTable').find('td').slice(1, 5);
@@ -2790,6 +3098,8 @@ function ScreenGraph(kpiInfo) {
 		this.startYear=(new Date(graphStartTime)).getFullYear();
 		var graphEndTime = secondGraphDate.getTime();
 		var graphGranularity = $('#granularityChart').val();
+		var granularityID = $('#granularityChart').find(":selected").attr("id");
+		var enablePred = $('#predictionSwitch').is(":checked");
 		$('#graphButton').on('click', function(event) {
 			scr.updateGraph();
 			var startDate = ($('#fromDateChart').handleDtpicker('getDate').getTime())!==undefined?$('#fromDateChart').handleDtpicker('getDate').getTime():graphStartTime;
@@ -2805,7 +3115,9 @@ function ScreenGraph(kpiInfo) {
 		$.ajax({
 			url: restAddress + "func/getGraphData?kpiId=" + loadedKpi + 
 							   "&contextualInformation=" + graphContextualInformation + 
-							   "&granularity=" + graphGranularity + 
+							   "&granularity=" + graphGranularity +
+							   "&granularityID=" + granularityID +
+							   "&withPrediction="+ enablePred+
 							   "&startTime=" + graphStartTime + 
 							   "&endTime=" + graphEndTime,
 			type: "GET",
@@ -2903,6 +3215,7 @@ function ScreenGraph(kpiInfo) {
 			titleFontSize: 20,
 			title: "Scrap rate",
 		});
+		
 		$.ajax({
 			url: restAddress + "func/getRealTimeKpis?kpiId=" + loadedKpi,
 			type: "GET",
@@ -2912,10 +3225,9 @@ function ScreenGraph(kpiInfo) {
 				scr.oee(realTimeKpisData.oee);
 			},
 		});
-
 		showScreen(true);
 
-		this.connect();
+		//this.connect();
 
 	}
 
@@ -2937,7 +3249,6 @@ function ScreenGraph(kpiInfo) {
 		}
 		return graphSeries;
 	}
-
 
 	this.closeScreen = function() {
 		showScreen(false);
@@ -2982,10 +3293,10 @@ function ScreenGraph(kpiInfo) {
 		var margin = {
 				top: 30,
 				right: 0,
-				bottom: 50,
+				bottom: 80,
 				left: 140
 			},
-			height = (201 - margin.top - margin.bottom) * heatMapData.yLabels.length,
+			height = (60) * heatMapData.yLabels.length,
 			gridSize = Math.floor(width / (heatMapData.xLabels.length + 1)),
 			gridHeight = 60/*118*/,
 			legendElementWidth = gridSize*minWidth/width,
@@ -3006,7 +3317,7 @@ function ScreenGraph(kpiInfo) {
 			})
 			.attr("x", deltaX)
 			.attr("y", function(d, i) {
-				return i * gridHeight;
+				return i * gridHeight - (gridHeight/2);
 			})
 			.style("text-anchor", "end")
 			.attr("transform", "translate(-6," + gridSize / 1.5 + ")")
@@ -3057,22 +3368,7 @@ function ScreenGraph(kpiInfo) {
 				return (d.varY - 1) * gridHeight;
 			})
 			.attr("title", function(d) {
-				$(this).tooltip({
-					content: kpiFormatValueString(loadedKpiNumberFormat, d.value, true, false)
-						/*d.value==null?"No data":((loadedKpi>=4)?
-							'Value: ' + (d.value).toFixed(2) + '%' : 
-							'Value: ' + (d.value))*/,
-					position: {
-						at: "top-60"
-					},
-					show: {
-						duration: 0
-					},
-					hide: {
-						duration: 0
-					}
-				});
-				return "Value: " + d.value;
+				return kpiFormatValueString(loadedKpiNumberFormat, d.value, true, false);
 			})
 			.attr("rx", 4)
 			.attr("ry", 4)
@@ -3112,7 +3408,7 @@ function ScreenGraph(kpiInfo) {
 			.attr("x", function(d, i) {
 				return legendElementWidth * factor * i;
 			})
-			.attr("y", height + margin.top - 30)
+			.attr("y", height + margin.top)
 			.attr("width", legendElementWidth * factor)
 			.attr("height", gridHeight / 6)
 			.style("fill", function(d, i) {
@@ -3127,12 +3423,14 @@ function ScreenGraph(kpiInfo) {
 			.attr("x", function(d, i) {
 				return legendElementWidth * factor * i;
 			})
-			.attr("y", height + gridHeight - 80);
+			.attr("y", height + gridHeight - 40);
 		var fillColor = "";
 		legend.exit().remove();
 		$('rect').hover(function() {
 				fillColor = $(this).css('fill');
 				$(this).css('fill', '#AFE8FF');
+				//var position = $(this).position();
+				//alert( "left: " + position.left + ", top: " + position.top );
 			},
 			function() {
 				$(this).css('fill', fillColor);
@@ -3146,6 +3444,9 @@ function ScreenGraph(kpiInfo) {
 				break;
 			}
 		}
+		
+		initializeTooltips();
+		
 		$('#heatMapTitle').html('<h4>' + heatMapData.title + '</h4>' + (heatMapData.subTitle !== undefined ? '<h5>' + heatMapData.subTitle + '</h5>' : ''));
 	}
 
@@ -3159,7 +3460,7 @@ function ScreenGraph(kpiInfo) {
 				margins: [10, 110, 20, 50],
 				defaultSeries: {
 					plotProps: {
-						"stroke-width": 4
+						"stroke-width": 5
 					},
 					dot: true,
 					dotProps: {
@@ -3172,48 +3473,9 @@ function ScreenGraph(kpiInfo) {
 						fill: $('#GlobalIncludeId').is(":checked"),
 						color: "#7CB5EC"
 					},
-					serie2: {
-						color: "#FF2020"
-					},
-					serie3: {
-						color: "#90ED7D"
-					},
-					serie4: {
-						color: "#F7A35C"
-					},
-					serie5: {
-						color: "#C0C0C0"
-					},
-					serie6: {
-						color: "#8085E9"
-					},
-					serie7: {
-						color: "#009999"
-					},
-					serie8: {
-						color: "#000000"
-					},
-					serie9: {
-						color: "#F5007B"
-					},
-					serie10: {
-						color: "#9900CC"
-					},
-					serie11: {
-						color: "#EBEB00"
-					},
-					serie12: {
-						color: "#0000EB"
-					},					
-					serie13: {
-						color: "#A0A0A0"
-					},					
-
-
 				},
 				defaultAxis: {
-					labels: true,
-
+					labels: true
 				},
 				features: {
 					mousearea: {
@@ -3291,6 +3553,18 @@ function ScreenGraph(kpiInfo) {
 						'color': scr.getRandomColor()
 					};
 				}
+
+				//add predictions to the char
+				var result = (graphData.data).concat(graphData.predictions);
+				for(var i = 0; i < graphData.predictions.length; i++){
+				
+					$.elycharts.templates["line_basic_1"].series['serie' + (len+1+i)] = {
+							'color': $.elycharts.templates["line_basic_1"].series['serie' + (i+1)].color,
+							'plotProps' : { "stroke-dasharray" : "-"}
+						};					
+				}
+
+				
 				$.elycharts.templates["line_basic_1"].features.legend.x = $('#chart').width() - 100;
 				var limits=[];
 				for(var i=0;i<kpiTargets.length;i++)
@@ -3363,7 +3637,10 @@ function ScreenGraph(kpiInfo) {
 					tooltips: function(serieId, lineIndex, valueIndex, singleValue) {
 						var legend="";
 						if(lineIndex.startsWith("serie")) {
-							legend=this.legend[lineIndex.substring(5,lineIndex.length)-1]+"<br>";
+							var index = lineIndex.substring(5,lineIndex.length)-1;
+							if(index >= len)
+								index-=len;
+							legend=this.legend[index]+"<br>";
 						}
 						else {
 							legend="Target<br>";
@@ -3378,7 +3655,7 @@ function ScreenGraph(kpiInfo) {
 					percentage:isPercentage(loadedKpiNumberFormat)/*loadedKpi>=4?true:false,false*/,
 					legend: graphData.legend,
 					labels: graphData.labels,
-					values: scr.graphSeriesValues(graphData.data),
+					values: scr.graphSeriesValues(result),
 					limits: limits,
 					defaultSeries: {
 						tooltip: {
@@ -3425,6 +3702,7 @@ function ScreenGraph(kpiInfo) {
 		}
 	};
 
+	/*
 	$.elycharts.templates['line_basic_1'] = {
 		type: "line",
 		margins: [10, 110, 20, 50],
@@ -3483,7 +3761,7 @@ function ScreenGraph(kpiInfo) {
 				}
 			}
 		}
-	};
+	};*/
 }
 
 function ScreenQuery() {
@@ -4008,6 +4286,16 @@ function selectDifferentOption(selectedSet){
 function initializeTooltips(){
 	$(document).ready(function(){
 	    $('[data-toggle="tooltip"]').tooltip();
+	    $('rect').tooltip({
+    			container: 'body',
+	    	    position: {
+	    	        //my: "center bottom-60",
+	    	        at: "center top"
+	    	    },
+	    	    show: {
+					duration: 0
+				}
+	    	});
 	});		
 }
 
