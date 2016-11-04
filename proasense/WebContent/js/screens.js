@@ -2372,7 +2372,7 @@ function Screen2(kpiInfo) {
 				if (kpiInfoTmp.number_support_format.toUpperCase()  == 'PERCENTAGE') {
 					upperValue = parseFloat((upperValue/100).toFixed(4));
 				} else if (kpiInfoTmp.number_support_format.toUpperCase()  == 'DECIMAL'){
-					upperValue = parseFloat((upperValue*1).toFixed(2));
+					upperValue = parseFloat(upperValue).toFixed(4);
 				}
 				upValValidateNShow = upperValue;
 			}
@@ -2388,7 +2388,7 @@ function Screen2(kpiInfo) {
 				if (kpiInfoTmp.number_support_format.toUpperCase()  == 'PERCENTAGE') {
 					lowerValue=parseFloat((lowerValue/100).toFixed(4));
 				} else if (kpiInfoTmp.number_support_format.toUpperCase()  == 'DECIMAL'){
-					lowerValue = parseFloat((lowerValue*1).toFixed(2));
+					lowerValue = parseFloat(lowerValue).toFixed(4);
 				}
 				
 				lwValValidateNShow = lowerValue;
