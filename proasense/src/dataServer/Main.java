@@ -60,7 +60,7 @@ public class Main extends HttpServlet {
 	// ################################################ variavel para
 	// utilizar storage ou valores de teste
 	// ###################################
-	boolean testing = false;
+	boolean testing = true;
 	// #################################################################################################################################################
 
 				
@@ -104,7 +104,7 @@ public class Main extends HttpServlet {
 					
 					// string de teste
 					if (testing)
-						responseStr = "[{\"id\":\"sensor_1_id\",\"name\":\"sensor 1\"},{\"id\":\"sensor_2_id\",\"name\":\"sensor 2\"}]";
+						responseStr = "[{\"id\":\"sensor1id\",\"name\":\"Quality\"},{\"id\":\"sensor2id\",\"name\":\"Count\"},{\"id\":\"sensor3id\",\"name\":\"Stock\"}]";
 					else
 						responseStr = this.getSensorIdsNameList(idReq);
 
@@ -121,8 +121,16 @@ public class Main extends HttpServlet {
 					//System.out.println("Contexto : "+context);
 					
 					// string de teste
-					if (testing)
-						responseStr = "[{\"name\":\"event 1\",\"type\":\"boolean\",\"partition\":\"true\"},{\"name\":\"event 2\",\"type\":\"string\",\"partition\":\"false\"},{\"name\":\"event 3\",\"type\":\"double\",\"partition\":\"true\"},{\"name\":\"event 4\",\"type\":\"long\",\"partition\":\"true\"}]";
+					if (testing){
+						if(reqId.equals("sensor1id"))
+							responseStr = "[{\"name\":\"Good\",\"type\":\"boolean\",\"partition\":\"true\"},{\"name\":\"Bad\",\"type\":\"string\",\"partition\":\"false\"}]";
+						else{
+							if(reqId.equals("sensor2id"))
+								responseStr = "[{\"name\":\"Total\",\"type\":\"boolean\",\"partition\":\"false\"},{\"name\":\"Finished\",\"type\":\"string\",\"partition\":\"false\"},{\"name\":\"Manufacturing\",\"type\":\"boolean\",\"partition\":\"true\"}]";
+							else
+								responseStr = "[{\"name\":\"Finished products\",\"type\":\"string\",\"partition\":\"false\"},{\"name\":\"Feedstock\",\"type\":\"boolean\",\"partition\":\"false\"}]";
+						}
+					}
 					else
 						responseStr = this.getSensorPropertiesList(reqId,context);
 
@@ -1266,28 +1274,28 @@ private String getParamValueOf(String paramString){
 			logPath = File.separator+"home"
 					+File.separator+"proasense"
 					+File.separator+"proasenseModeller"
-					+File.separator+"KPIrepMaven"
+					+File.separator+"KPIModeller"
 					+File.separator;
 			// Database that needs to be used IMPORTANT:has its identifiers as
 			// uppercase
 			dbPath = File.separator+"home"
 					+File.separator+"proasense"
 					+File.separator+"proasenseModeller"
-					+File.separator+"KPIrepMaven"
+					+File.separator+"KPIModeller"
 					+File.separator+"db"
 					+File.separator;
 		}else{
 			logPath = System.getProperty("user.home")
 					+File.separator+"proasense"
 					+File.separator+"proasenseModeller"
-					+File.separator+"KPIrepMaven"
+					+File.separator+"KPIModeller"
 					+File.separator;
 			// Database that needs to be used IMPORTANT:has its identifiers as
 			// uppercase
 			dbPath = System.getProperty("user.home")
 					+File.separator+"proasense"
 					+File.separator+"proasenseModeller"
-					+File.separator+"KPIrepMaven"
+					+File.separator+"KPIModeller"
 					+File.separator+"db"
 					+File.separator;
 		}
