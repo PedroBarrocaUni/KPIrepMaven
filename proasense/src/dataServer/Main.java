@@ -511,13 +511,27 @@ public class Main extends HttpServlet {
 			JSONArray pred = new JSONArray();
 			String predEnable = requestData.get("withPrediction");
 			
+			JSONArray dataArray = (JSONArray)data;
+			int linesNR = ((JSONArray)data).size();
+			int valuesNR = ((JSONArray)labelsTimeStamp).size();
+			
+			for(int j=0; j< ((JSONArray)data).size();j++)
+			{
+				for(int i=0; i<valuesNR;i++){
+					if(((JSONArray)dataArray.get(j)).get(i) == null){
+						((JSONArray)dataArray.get(j)).set(i, 0.0);
+					}
+				}
+			}
+			
 			if(predEnable.equals("true")){
 				
 				//calculation of forecasts
-				JSONArray kValues = (JSONArray)data;
+				JSONArray kValues = (JSONArray)dataArray;
 				JSONArray timestamps = (JSONArray)labelsTimeStamp;
 				int nrOfLines = kValues.size();
 				int nrOfValues = timestamps.size();
+				
 				int granularity = Integer.parseInt((requestData.get("granularityID")).toString());
 				
 						
@@ -529,7 +543,6 @@ public class Main extends HttpServlet {
 				{	
 					numb = 0;
 					for( int ind = 0; ind < nrOfValues; ind++ )
-						if(((JSONArray)kValues.get(j)).get(ind) != null)
 							numb++;
 					
 					//if(numb>0)
@@ -540,8 +553,11 @@ public class Main extends HttpServlet {
 						//problema em calular aqui!! prende no null
 						if(((JSONArray)kValues.get(j)).get(i) != null){
 							points[pointInd] = new myPoint(Double.parseDouble(timestamps.get(i).toString()),Double.parseDouble(((JSONArray)kValues.get(j)).get(i).toString()));
-							pointInd++;
+						}else{
+							//((JSONArray)kValues.get(j)).set(i, 0.0);
+							//points[pointInd] = new myPoint(Double.parseDouble(timestamps.get(i).toString()),0);
 						}
+						pointInd++;
 					}
 					datasets[j]= new myDataset(points);
 				}
@@ -620,14 +636,14 @@ public class Main extends HttpServlet {
 			}
 			
 			writeLogMsg("--------------- GRAPH DATA ----------------------------");
-			writeLogMsg("Data: " + data.toString());
+			writeLogMsg("Data: " + dataArray.toString());
 			writeLogMsg("Pred: " +pred.toString());
 			writeLogMsg("Labels: " + labels.toString());
 			writeLogMsg("Labels Time Stamp: " + labelsTimeStamp.toString());
 			writeLogMsg("Title: " + title.toString());
 			writeLogMsg("--------------- END GRAPH DATA ------------------------");
 
-			obj.put("data", data);
+			obj.put("data", dataArray);
 			obj.put("predictions", pred);
 			obj.put("legend", legend);
 			obj.put("labels", labels);
